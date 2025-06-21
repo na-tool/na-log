@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&#x65e5;&#x5fd7;&#x8bb0;&#x5f55;&#x6a21;&#x5757;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h3 id="日志记录模块">日志记录模块</h3>
+<pre><code class="language-text">本版本发布时间为 2021-05-01  适配jdk版本为 1.8
+</code></pre>
+<h4 id="1-配置">1 配置</h4>
+<h5 id="11-添加依赖">1.1 添加依赖</h5>
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;com.na&lt;/groupId&gt;
+    &lt;artifactId&gt;na-log&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+&lt;/dependency&gt;
+        
+或者
+
+&lt;dependency&gt;
+    &lt;groupId&gt;com.na&lt;/groupId&gt;
+    &lt;artifactId&gt;na-log&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;scope&gt;system&lt;/scope&gt;
+    &lt;systemPath&gt;${project.basedir}/../lib/na-log-1.0.0.jar&lt;/systemPath&gt;
+&lt;/dependency&gt;
+
+相关依赖
+
+&lt;dependency&gt;
+    &lt;groupId&gt;org.aspectj&lt;/groupId&gt;
+    &lt;artifactId&gt;aspectjweaver&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h5 id="12-配置">1.2 配置</h5>
+<pre><code class="language-yaml"><span class="hljs-attr">na:</span>
+  <span class="hljs-attr">log:</span>
+<span class="hljs-comment"># 是否开启日志记录功能，默认开启</span>
+    <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span>
+    <span class="hljs-attr">key:</span> <span class="hljs-string">秘钥需要申请</span>
+</code></pre>
+<h5 id="13-使用">1.3 使用</h5>
+<pre><code class="language-java"><span class="hljs-comment">/**
+ * 接口上使用注解
+ */</span>
+<span class="hljs-meta">@OperationLog(formatter = UserTreeFormatter.class)</span>
+
+
+<span class="hljs-comment">/**
+ * 自定义model枚举
+ */</span>
+<span class="hljs-keyword">import</span> com.na.syslog.enums.INaModelProvider;
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">enum</span> <span class="hljs-title class_">MyModuleEnum</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">INaModelProvider</span> {
+    USER_MANAGEMENT(<span class="hljs-string">&quot;USER_MANAGEMENT&quot;</span>, <span class="hljs-string">&quot;用户管理&quot;</span>),
+    ;
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String code;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String desc;
+
+    <span class="hljs-keyword">private</span> <span class="hljs-title function_">MyModuleEnum</span><span class="hljs-params">(String code, String desc)</span> {
+        <span class="hljs-built_in">this</span>.code = code;
+        <span class="hljs-built_in">this</span>.desc = desc;
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getCode</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> code;
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getDesc</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> desc;
+    }
+}
+
+
+<span class="hljs-comment">/**
+ * 自定义operate枚举
+ */</span>
+
+<span class="hljs-keyword">import</span> com.na.syslog.enums.INaOperateProvider;
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">enum</span> <span class="hljs-title class_">MyOperateEnum</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">INaOperateProvider</span> {
+    QUERY(<span class="hljs-string">&quot;QUERY&quot;</span>, <span class="hljs-string">&quot;查询&quot;</span>),
+    ;
+
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String code;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> String desc;
+
+    <span class="hljs-keyword">private</span> <span class="hljs-title function_">MyOperateEnum</span><span class="hljs-params">(String code, String desc)</span> {
+        <span class="hljs-built_in">this</span>.code = code;
+        <span class="hljs-built_in">this</span>.desc = desc;
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getCode</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> code;
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> String <span class="hljs-title function_">getDesc</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> desc;
+    }
+}
+
+
+<span class="hljs-comment">/**
+ * 具体实现
+ */</span>
+<span class="hljs-meta">@Component</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">UserTreeFormatter</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">ILogFormatter</span> {
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">beforeContext</span><span class="hljs-params">(LogFormatterContext context)</span> {
+<span class="hljs-comment">//        Object[] parameters = context.getParameters();</span>
+<span class="hljs-comment">//        Principal principal = (Principal) parameters[0];</span>
+        <span class="hljs-comment">// 若未使用auth模块，请使用其他自定义方式获取当前用户</span>
+        <span class="hljs-type">AuthUserModel</span> <span class="hljs-variable">model</span> <span class="hljs-operator">=</span> NaAuthUtil.getCurrentUser();
+        <span class="hljs-type">String</span> <span class="hljs-variable">content</span> <span class="hljs-operator">=</span> <span class="hljs-string">&quot;【&quot;</span> + model.getUsername() + <span class="hljs-string">&quot;】 查询个人路由树&quot;</span>;
+        context.setContent(content);
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">afterContext</span><span class="hljs-params">(LogFormatterContext context)</span> {
+
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> INaModelProvider <span class="hljs-title function_">module</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> MyModuleEnum.USER_MANAGEMENT;
+    }
+
+    <span class="hljs-meta">@Override</span>
+    <span class="hljs-keyword">public</span> INaOperateProvider <span class="hljs-title function_">operate</span><span class="hljs-params">()</span> {
+        <span class="hljs-keyword">return</span> MyOperateEnum.QUERY;
+    }
+}
+
+
+<span class="hljs-comment">/**
+ * 日志监听 写入到数据库
+ */</span>
+<span class="hljs-meta">@Slf4j</span>
+<span class="hljs-meta">@Component</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">MySysLogListenerServiceImpl</span> {
+
+    <span class="hljs-meta">@Async(&quot;sysLogThreadPool&quot;)</span>
+    <span class="hljs-meta">@EventListener(SysLogEvent.class)</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">handleSysLogEvent</span><span class="hljs-params">(SysLogEvent event)</span> {
+        <span class="hljs-type">SysLogDto</span> <span class="hljs-variable">sysLogDto</span> <span class="hljs-operator">=</span> (SysLogDto) event.getSource();
+        <span class="hljs-comment">// 这里可以处理sysLogModel对象，如保存到数据库或其他操作</span>
+        System.out.println(<span class="hljs-string">&quot;Received sysLogDto: &quot;</span> + sysLogDto);
+    }
+}
+
+
+</code></pre>
+<h1 id="注意启动类配置">【注意】启动类配置</h1>
+<pre><code>如果你的包名不是以com.na开头的，需要配置
+@ComponentScan(basePackages = {&quot;com.na&quot;, &quot;com.ziji.baoming&quot;}) // 扫描多个包路径
+</code></pre>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
