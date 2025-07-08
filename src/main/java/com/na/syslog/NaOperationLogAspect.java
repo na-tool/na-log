@@ -146,6 +146,9 @@ public class NaOperationLogAspect {
 
                     sysLogDto.setUa(StringUtils.isEmpty(ua) ? "" : ua.substring(0, Math.min(ua.length(), strMaxLength)));
 
+                    sysLogDto.setRequest(context.context.getRequest());
+                    sysLogDto.setResponse(context.context.getResponse());
+
                 }
             }
             catch (Exception e) {
@@ -194,7 +197,7 @@ public class NaOperationLogAspect {
 
                 context = new LogAspectContext();
                 context.formatter = formatter;
-                context.context = new NaLogFormatterContext(request, targetClass.getName(), method, pointArgs);
+                context.context = new NaLogFormatterContext(request,response, targetClass.getName(), method, pointArgs);
             }
         }
 

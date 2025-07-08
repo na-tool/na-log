@@ -5,7 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -37,5 +40,10 @@ public class NaSysLogDto {
 
     private String tenantName;
     private String userName;
+
+    private Map<String, Object> ext;
+
+    HttpServletRequest request;
+    HttpServletResponse response;
 
 }
