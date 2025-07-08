@@ -41,11 +41,6 @@ public class NaOperationLogAspect {
     private NaLogEventUtil naLogEventUtil;
 
     /**
-     * 四字节字符（如表情符号）：65535字节可以存储大约 16383 个字符
-     */
-    private Integer strMaxLength = 16383;
-
-    /**
      * 定义一个切入点.
      * 第一个 * 代表任意修饰符及任意返回值.
      * 第二个 * 任意包名
@@ -97,7 +92,7 @@ public class NaOperationLogAspect {
                 e.printStackTrace(new PrintWriter(sw, true));
                 // 异常的详情
                 String expDetail = sw.toString();
-                sysLogDto.setExDetail(StringUtils.isEmpty(expDetail) ? "" : expDetail.substring(0, Math.min(expDetail.length(), strMaxLength)));
+                sysLogDto.setExDetail(expDetail);
             }
 
             try {
@@ -129,10 +124,10 @@ public class NaOperationLogAspect {
                         builder.append(StringUtils.isEmpty(String.valueOf(parameter)) ? "" : String.valueOf(parameter));
                     }
                     String params = builder.toString();
-                    sysLogDto.setParams(StringUtils.isEmpty(params) ? "" : params.substring(0, Math.min(params.length(), strMaxLength)));
+                    sysLogDto.setParams(params);
                     //请求结果
                     String resultStr = String.valueOf(context.context.getResult());
-                    sysLogDto.setResult(StringUtils.isEmpty(resultStr) ? "" : resultStr.substring(0, Math.min(resultStr.length(), strMaxLength)));
+                    sysLogDto.setResult(resultStr);
                     //获取请求方法
                     sysLogDto.setStartTime(startTime);
                     sysLogDto.setFinishTime(finishTime);
@@ -144,7 +139,7 @@ public class NaOperationLogAspect {
 
                     String ua = context.context.getRequest().getHeader("user-agent");
 
-                    sysLogDto.setUa(StringUtils.isEmpty(ua) ? "" : ua.substring(0, Math.min(ua.length(), strMaxLength)));
+                    sysLogDto.setUa(ua);
 
                     sysLogDto.setRequest(context.context.getRequest());
                     sysLogDto.setResponse(context.context.getResponse());
@@ -161,7 +156,7 @@ public class NaOperationLogAspect {
                 e.printStackTrace(new PrintWriter(sw, true));
                 // 异常的详情
                 String expDetail = sw.toString();
-                sysLogDto.setExDetail(StringUtils.isEmpty(expDetail) ? "" : expDetail.substring(0, Math.min(expDetail.length(), strMaxLength)));
+                sysLogDto.setExDetail(expDetail);
             }
             sysLogDto.setOperateTime(NaDateTimeUtil.getCurrentBeijingDateTime());
             naLogEventUtil.publishEvent(sysLogDto);
