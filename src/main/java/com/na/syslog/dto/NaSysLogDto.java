@@ -43,7 +43,7 @@ public class NaSysLogDto {
 
     private Map<String, Object> ext;
 
-    HttpServletRequest request;
-    HttpServletResponse response;
+    private HttpServletRequest request;
+    private HttpServletResponse response;
 
 }
