@@ -6,7 +6,7 @@
     <artifactId>na-log</artifactId>
     <name>${project.artifactId}</name>
     <groupId>io.github.na-tool</groupId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <packaging>jar</packaging>
     <description>日志模块</description>
 
@@ -82,7 +82,7 @@
        <dependency>
            <groupId>io.github.na-tool</groupId>
            <artifactId>na-common</artifactId>
-           <version>1.0.5</version>
+           <version>1.0.7</version>
            <scope>provided</scope>
        </dependency>
        <dependency>

@@ -174,10 +174,8 @@ public class NaOperationLogAspect {
     private LogAspectContext handleAround(ProceedingJoinPoint point) throws Exception {
         LogAspectContext context = null;
 
-        HttpServletRequest request = ((ServletRequestAttributes) Objects.requireNonNull(
-                RequestContextHolder.getRequestAttributes())).getRequest();;
-        HttpServletResponse response = ((ServletRequestAttributes) Objects.requireNonNull(
-                RequestContextHolder.getRequestAttributes())).getResponse();
+        HttpServletRequest request = NaCommonUtil.getCurrentHttpRequest();
+        HttpServletResponse response = NaCommonUtil.getCurrentHttpResponse();
 
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
