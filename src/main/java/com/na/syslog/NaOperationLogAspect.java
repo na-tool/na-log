@@ -3,11 +3,11 @@ package com.na.syslog;
 import com.na.common.constant.NaConst;
 import com.na.common.exceptions.NaBusinessException;
 import com.na.common.result.enums.NaStatus;
+import com.na.common.syslog.dto.NaSysLogDto;
 import com.na.common.utils.*;
 import com.na.syslog.annotation.NaOperationLog;
 import com.na.syslog.config.NaAutoLogConfig;
-import com.na.syslog.dto.NaSysLogDto;
-import com.na.syslog.utils.NaLogEventUtil;
+import com.na.common.syslog.util.NaLogEventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -18,8 +18,6 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -27,7 +25,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Aspect
 @Configuration
