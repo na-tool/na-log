@@ -59,14 +59,14 @@ public class NaOperationLogAspect {
      */
     @Around("entryPoint()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
-        String key = naAutoLogConfig != null ? naAutoLogConfig.getKey() : null;
-        if (StringUtils.isEmpty(key)) {
-            throw new NaBusinessException(NaStatus.AUTHORIZATION_EXPIRED,null);
-        }
-
-        if(!LicenseValidator.isValidLicense(key)) {
-            throw new NaBusinessException(NaStatus.AUTHORIZATION_EXPIRED,null);
-        }
+//        String key = naAutoLogConfig != null ? naAutoLogConfig.getKey() : null;
+//        if (StringUtils.isEmpty(key)) {
+//            throw new NaBusinessException(NaStatus.AUTHORIZATION_EXPIRED,null);
+//        }
+//
+//        if(!LicenseValidator.isValidLicense(key)) {
+//            throw new NaBusinessException(NaStatus.AUTHORIZATION_EXPIRED,null);
+//        }
 
         LocalDateTime startTime = NaDateTimeUtil.getCurrentBeijingDateTime();
         Object result = point.proceed();
