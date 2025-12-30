@@ -144,14 +144,67 @@ public class UserTreeFormatter implements ILogFormatter {
  */
 @Slf4j
 @Component
-public class MySysLogListenerServiceImpl {
+public class SysLogEventListener {
+    @Autowired
+    private ISysLogMapper sysLogMapper;
+
+    private static final Integer STR_MAX_LENGTH = 16383;
 
     @Async("sysLogThreadPool")
-    @EventListener(SysLogEvent.class)
-    public void handleSysLogEvent(SysLogEvent event) {
-        SysLogDto sysLogDto = (SysLogDto) event.getSource();
-        // 这里可以处理sysLogModel对象，如保存到数据库或其他操作
+    @EventListener(NaSysLogEvent.class)
+    public void handleSysLogEvent(NaSysLogEvent event) {
+        if (event == null || event.getSource() == null) {
+            return;
+        }
+        NaSysLogDto sysLogDto;
+        try {
+            sysLogDto = (NaSysLogDto) event.getSource();
+        } catch (ClassCastException e) {
+            // 如果类型不匹配，直接不处理
+            return;
+        }
         System.out.println("Received sysLogDto: " + sysLogDto);
+        String requestUri = sysLogDto.getRequestUri();
+        String result = sysLogDto.getResult();
+        String exDetail = sysLogDto.getExDetail();
+
+
+        SysLogEntity entity = new SysLogEntity();
+        entity.setId(sysLogDto.getId() == null ? NaIDUtil.ID(17) : sysLogDto.getId());
+        entity.setUserId(StringUtils.isEmpty(sysLogDto.getUserId()) ? 0L : Long.parseLong(sysLogDto.getUserId()));
+        entity.setRequestIp(Objects.toString(sysLogDto.getRequestIp(), ""));
+        entity.setType(Objects.toString(sysLogDto.getType(), ""));
+        entity.setDescription(Objects.toString(sysLogDto.getDescription(), ""));
+        entity.setClassPath(Objects.toString(sysLogDto.getClassPath(), ""));
+        entity.setActionMethod(Objects.toString(sysLogDto.getActionMethod(), ""));
+        entity.setRequestUri(org.springframework.util.StringUtils.isEmpty(requestUri) ? "" :
+                requestUri.substring(0, Math.min(requestUri.length(), STR_MAX_LENGTH)));
+        entity.setHttpMethod(Objects.toString(sysLogDto.getHttpMethod(), ""));
+        String paramsJson = JSONObject.toJSONString(sysLogDto.getParams());
+        if (paramsJson != null && paramsJson.length() > 1000) {
+            paramsJson = paramsJson.substring(0, 1000) + "...(truncated)";
+        }
+        entity.setParams(Objects.toString(paramsJson, ""));
+        entity.setResult(org.springframework.util.StringUtils.isEmpty(result) ? "" :
+                result.substring(0, Math.min(result.length(), STR_MAX_LENGTH)));
+        entity.setExDesc(Objects.toString(sysLogDto.getExDesc(), ""));
+        entity.setExDetail(org.springframework.util.StringUtils.isEmpty(exDetail) ? "" :
+                exDetail.substring(0, Math.min(exDetail.length(), STR_MAX_LENGTH)));
+        entity.setStartTime(sysLogDto.getStartTime());
+        entity.setFinishTime(sysLogDto.getFinishTime());
+        entity.setConsumingTime(sysLogDto.getConsumingTime());
+        entity.setModule(Objects.toString(sysLogDto.getModule(), ""));
+        entity.setOperate(Objects.toString(sysLogDto.getOperate(), ""));
+        entity.setContent(Objects.toString(sysLogDto.getContent(), ""));
+        entity.setUa(Objects.toString(sysLogDto.getUa(), ""));
+        entity.setOperateTime(sysLogDto.getOperateTime());
+        HttpServletRequest request = sysLogDto.getRequest();
+        entity.setUserId(TokenUtil.userId());
+        try {
+            sysLogMapper.insert(entity);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
 
