@@ -11,4 +11,5 @@ import org.springframework.stereotype.Component;
 public class NaAutoLogConfig {
 //    private String key;
     private Boolean enabled = true;
+    private Boolean cn = false;
 }

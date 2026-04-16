@@ -132,6 +132,10 @@ public class NaOperationLogAspect {
                     sysLogDto.setConsumingTime(calculated);
                     sysLogDto.setModule(context.formatter.module().getCode());
                     sysLogDto.setOperate(context.formatter.operate().getCode());
+                    if(Boolean.TRUE.equals(naAutoLogConfig.getCn())){
+                        sysLogDto.setModule(context.formatter.module().getDesc());
+                        sysLogDto.setOperate(context.formatter.operate().getDesc());
+                    }
                     sysLogDto.setContent(context.context.getContent());
 
                     String ua = context.context.getRequest().getHeader("user-agent");
