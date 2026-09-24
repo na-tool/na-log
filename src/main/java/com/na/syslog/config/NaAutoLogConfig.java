@@ -2,11 +2,15 @@ package com.na.syslog.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
 
+/**
+ * na.log 配置项。
+ *
+ * 不再标 @Component：由 NaLogAutoConfiguration 的 @EnableConfigurationProperties
+ * 注册，避免与自动装配重复注册同一个 Bean。
+ */
 @Data
-@Component
 @ConfigurationProperties(prefix = "na.log")
 public class NaAutoLogConfig {
 //    private String key;

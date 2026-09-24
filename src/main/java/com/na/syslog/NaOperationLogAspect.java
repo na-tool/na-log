@@ -20,8 +20,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,16 +27,25 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 
+/**
+ * 操作日志采集切面。
+ *
+ * 由 NaLogAutoConfiguration 以 @Bean 方式注册，类上不再挂 @Configuration：
+ * 该注解原本只是为了被组件扫描命中，而扫描要求宿主把自己的包名与 com.na 对齐，
+ * 宿主包名不同时模块会静默失效。改走自动装配后不再有这个约束。
+ */
 @Aspect
-@Configuration
 @Order(2)
 @Slf4j
 public class NaOperationLogAspect {
-    @Autowired
-    private NaAutoLogConfig naAutoLogConfig;
 
-    @Autowired
-    private LogEventUtil logEventUtil;
+    private final NaAutoLogConfig naAutoLogConfig;
+    private final LogEventUtil logEventUtil;
+
+    public NaOperationLogAspect(NaAutoLogConfig naAutoLogConfig, LogEventUtil logEventUtil) {
+        this.naAutoLogConfig = naAutoLogConfig;
+        this.logEventUtil = logEventUtil;
+    }
 
     /**
      * 定义一个切入点.
