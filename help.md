@@ -38,9 +38,6 @@
 </dependency>
 ```
 
-> `na-common` 必须与 na-log 用同一大版本。3.0.0 去掉了全部 `Na` 类名前缀
-> （`NaSysLogDto`→`SysLogDto`、`NaIDUtil`→`IDUtil` 等），与 2.x 不兼容。
-
 ##### 1.2 配置项
 
 ```yaml
@@ -73,7 +70,7 @@ na-log 通过 Spring Boot 自动装配注册（`META-INF/spring/...AutoConfigura
 ##### 2.1 注解
 
 ```java
-@NaOperationLog(formatter = UserTreeFormatter.class)
+@OperationLog(formatter = UserTreeFormatter.class)
 ```
 
 切点匹配 `com.na.controller` 包下的公有方法，或任意 `*controller*` 包内带该注解的公有方法。
@@ -82,9 +79,9 @@ na-log 通过 Spring Boot 自动装配注册（`META-INF/spring/...AutoConfigura
 ##### 2.2 自定义模块与操作枚举
 
 ```java
-import com.na.syslog.enums.INaModelProvider;
+import com.na.syslog.enums.IModelProvider;
 
-public enum MyModuleEnum implements INaModelProvider {
+public enum MyModuleEnum implements IModelProvider {
     USER_MANAGEMENT("USER_MANAGEMENT", "用户管理"),
     ;
 
@@ -109,9 +106,9 @@ public enum MyModuleEnum implements INaModelProvider {
 ```
 
 ```java
-import com.na.syslog.enums.INaOperateProvider;
+import com.na.syslog.enums.IOperateProvider;
 
-public enum MyOperateEnum implements INaOperateProvider {
+public enum MyOperateEnum implements IOperateProvider {
     QUERY("QUERY", "查询"),
     ;
 
@@ -136,32 +133,32 @@ public enum MyOperateEnum implements INaOperateProvider {
 ```
 
 `getCode()` 的返回值直接落库到日志的 `module` / `operate` 字段，改动会与历史记录语义不一致。
-内置字典见 `NaModuleEnum` / `NaOperateEnum`。
+内置字典见 `ModuleEnum` / `OperateEnum`。
 
 ##### 2.3 自定义 Formatter
 
 ```java
 @Component
-public class UserTreeFormatter implements INaLogFormatter {
+public class UserTreeFormatter implements ILogFormatter {
 
     @Override
-    public void beforeContext(NaLogFormatterContext context) {
+    public void beforeContext(LogFormatterContext context) {
         // 若未使用 auth 模块，请用其他方式获取当前用户
         String content = "查询个人路由树";
         context.setContent(content);
     }
 
     @Override
-    public void afterContext(NaLogFormatterContext context) {
+    public void afterContext(LogFormatterContext context) {
     }
 
     @Override
-    public INaModelProvider module() {
+    public IModelProvider module() {
         return MyModuleEnum.USER_MANAGEMENT;
     }
 
     @Override
-    public INaOperateProvider operate() {
+    public IOperateProvider operate() {
         return MyOperateEnum.QUERY;
     }
 }
@@ -170,7 +167,7 @@ public class UserTreeFormatter implements INaLogFormatter {
 实现类必须注册为 Spring Bean。`beforeContext` 抛出的异常会被切面吞掉并降级为
 `type=ex` 的记录，此时 `afterContext` 不再执行，业务方法仍正常返回。
 
-`NaLogFormatterContext` 暴露的 servlet 类型是 **`jakarta.servlet.http.*`**：
+`LogFormatterContext` 暴露的 servlet 类型是 **`jakarta.servlet.http.*`**：
 
 ```java
 import jakarta.servlet.http.HttpServletRequest;
@@ -215,10 +212,10 @@ public class SysLogListener {
 | 变更 | 需要做什么 |
 |---|---|
 | 坐标 `com.na:na-log:1.0.0` → `io.github.na-tool:na-log:3.0.0` | 改依赖坐标 |
-| 注解 `@OperationLog` → `@NaOperationLog` | 全局替换注解 |
-| `ILogFormatter` / `LogFormatterContext` → `INaLogFormatter` / `NaLogFormatterContext` | 全局替换类型名 |
+| 注解 `@OperationLog` → `@OperationLog` | 全局替换注解 |
+| `ILogFormatter` / `LogFormatterContext` → `ILogFormatter` / `LogFormatterContext` | 全局替换类型名 |
 | servlet API 由 `javax` 改为 `jakarta` | 自定义 Formatter 的 import 改 jakarta |
-| `NaSysLogEvent` / `NaSysLogDto` → `SysLogEvent` / `SysLogDto` | 监听器改类型 |
+| `SysLogEvent` / `SysLogDto` → `SysLogEvent` / `SysLogDto` | 监听器改类型 |
 | 不再需要 `@ComponentScan("com.na")` | 可删掉该扫描（na-common 仍需扫描） |
 | `na.log.key` 失效 | 删掉配置项 |
 | `params` 落库格式：逗号分隔 + 1000 字符截断 | 若下游有解析逻辑需适配 |
