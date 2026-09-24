@@ -77,20 +77,21 @@
        <dependency>
            <groupId>org.aspectj</groupId>
            <artifactId>aspectjweaver</artifactId>
-           <version>1.9.7</version>
-           <scope>provided</scope>
-       </dependency>
-       <dependency>
-           <groupId>io.github.na-tool</groupId>
-           <artifactId>na-common</artifactId>
-           <version>3.0.0</version>
            <scope>provided</scope>
        </dependency>
        <dependency>
            <groupId>org.apache.commons</groupId>
            <artifactId>commons-lang3</artifactId>
-           <version>3.12.0</version>
+           <!-- 3.0~3.17.x 受 CVE-2025-48924 影响（ClassUtils.getClass 无控递归抛
+                StackOverflowError），3.18.0 修复。Spring Boot 3.5.16 管理的 3.17.0
+                同样在受影响区间，故此处显式钉 3.18.0。 -->
+           <version>3.18.0</version>
            <scope>provided</scope>
+       </dependency>
+       <dependency>
+           <groupId>org.springframework.boot</groupId>
+           <artifactId>spring-boot-starter-test</artifactId>
+           <scope>test</scope>
        </dependency>
    </dependencies>
 
