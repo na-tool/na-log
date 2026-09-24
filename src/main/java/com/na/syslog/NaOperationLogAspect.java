@@ -9,9 +9,12 @@ import com.na.common.utils.IDUtil;
 import com.na.common.utils.SpringContextUtil;
 import com.na.syslog.annotation.NaOperationLog;
 import com.na.syslog.config.NaAutoLogConfig;
+import com.na.syslog.enums.INaModelProvider;
+import com.na.syslog.enums.INaOperateProvider;
 import com.na.common.syslog.util.LogEventUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -23,8 +26,6 @@ import org.springframework.core.annotation.Order;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 
@@ -90,15 +91,7 @@ public class NaOperationLogAspect {
             catch (Exception e) {
                 log.error("日志记录异常", e);
                 context = null;
-                sysLogDto.setContent(null);
-                sysLogDto.setType(GlobalConst.EX);
-                sysLogDto.setExDesc("日志记录异常");
-                // 加入数据库日志记录
-                StringWriter sw = new StringWriter();
-                e.printStackTrace(new PrintWriter(sw, true));
-                // 异常的详情
-                String expDetail = sw.toString();
-                sysLogDto.setExDetail(expDetail);
+                markAsException(sysLogDto, e);
             }
 
             try {
@@ -114,36 +107,34 @@ public class NaOperationLogAspect {
                     sysLogDto.setTenantId((context.context.getTenantId()));
                     //api描述信息
                     //类名
-                    sysLogDto.setClassPath(context.context.getClassName());
-                    //方法名
-                    String[] classPath = context.context.getClassName().split("\\.");
-                    sysLogDto.setActionMethod(classPath[classPath.length - 1]);
+                    String className = context.context.getClassName();
+                    sysLogDto.setClassPath(className);
+                    //方法名：只取最后一个点之后的部分。原先用 split("\\.") 会为每个
+                    //请求编译一次正则并分配 Pattern/Matcher/数组，这里换成纯下标运算。
+                    int lastDot = className == null ? -1 : className.lastIndexOf('.');
+                    sysLogDto.setActionMethod(lastDot < 0 ? className : className.substring(lastDot + 1));
                     //请求api
                     sysLogDto.setRequestUri(context.context.getRequest().getRequestURI());
                     //请求方式
                     sysLogDto.setHttpMethod(context.context.getRequest().getMethod());
                     //请求参数
-                    Object[] parameters = context.context.getParameters();
-                    StringBuilder builder = new StringBuilder();
-                    for (Object parameter : parameters) {
-                        // 处理可能的 null 值，避免 NullPointerException
-                        builder.append(StringUtils.isEmpty(String.valueOf(parameter)) ? "" : String.valueOf(parameter));
-                    }
-                    String params = builder.toString();
-                    sysLogDto.setParams(params);
+                    sysLogDto.setParams(renderParams(context.context.getParameters()));
                     //请求结果
-                    String resultStr = String.valueOf(context.context.getResult());
-                    sysLogDto.setResult(resultStr);
+                    sysLogDto.setResult(renderResult(context.context.getResult()));
                     //获取请求方法
                     sysLogDto.setStartTime(startTime);
                     sysLogDto.setFinishTime(finishTime);
                     Long calculated = DateTimeUtil.calculateTimeDifference(startTime, finishTime);
                     sysLogDto.setConsumingTime(calculated);
-                    sysLogDto.setModule(context.formatter.module().getCode());
-                    sysLogDto.setOperate(context.formatter.operate().getCode());
+                    // module()/operate() 是宿主可自定义的虚方法，提取一次避免重复调用
+                    INaModelProvider module = context.formatter.module();
+                    INaOperateProvider operate = context.formatter.operate();
                     if (naAutoLogConfig.isCn()) {
-                        sysLogDto.setModule(context.formatter.module().getDesc());
-                        sysLogDto.setOperate(context.formatter.operate().getDesc());
+                        sysLogDto.setModule(module.getDesc());
+                        sysLogDto.setOperate(operate.getDesc());
+                    } else {
+                        sysLogDto.setModule(module.getCode());
+                        sysLogDto.setOperate(operate.getCode());
                     }
                     sysLogDto.setContent(context.context.getContent());
 
@@ -151,22 +142,20 @@ public class NaOperationLogAspect {
 
                     sysLogDto.setUa(ua);
 
-                    sysLogDto.setRequest(context.context.getRequest());
-                    sysLogDto.setResponse(context.context.getResponse());
+                    // 注意：不要把活的 servlet request/response 放进 SysLogDto。
+                    // 宿主监听器是 @Async("sysLogThreadPool")，回调时请求线程早已返回，
+                    // request 可能已被 Tomcat 回收（读取会抛 IllegalStateException 或
+                    // 读到下一个请求的数据）；且任务在队列中排队期间，整个 request
+                    // 对象图（headers/attributes/session/已解析的 body）无法回收。
+                    // 请求侧信息已在本方法内抽成标量字段（requestIp/requestUri/
+                    // httpMethod/ua），Formatter 若需更多可在请求线程内用
+                    // context.getRequest() 自行提取。
 
                 }
             }
             catch (Exception e) {
                 log.error("日志记录异常", e);
-                sysLogDto.setContent(null);
-                sysLogDto.setType(GlobalConst.EX);
-                sysLogDto.setExDesc("日志记录异常");
-                // 加入数据库日志记录
-                StringWriter sw = new StringWriter();
-                e.printStackTrace(new PrintWriter(sw, true));
-                // 异常的详情
-                String expDetail = sw.toString();
-                sysLogDto.setExDetail(expDetail);
+                markAsException(sysLogDto, e);
             }
             sysLogDto.setOperateTime(DateTimeUtil.getCurrentBeijingDateTime());
             try {
@@ -182,6 +171,82 @@ public class NaOperationLogAspect {
         return result;
     }
 
+
+    /** 与宿主 SysLogListener 对 params 的截断约定保持一致 */
+    private static final int MAX_PARAMS_LENGTH = 1000;
+    /** 与宿主 SysLogListener 的 STR_MAX_LENGTH 保持一致 */
+    private static final int MAX_RESULT_LENGTH = 16383;
+
+    /**
+     * 把方法入参渲染成单行文本。
+     * ArrayUtils.toString 对数组递归渲染为 {1,2,3}，对其它对象走 toString()，
+     * 对 null 返回兜底值；集合不递归，用其自身的 toString。
+     * 原实现用 String.valueOf 拼接且无分隔符，["ab","c"] 与 ["a","bc"] 会拼出
+     * 同一串、无法区分，且长度无上限。
+     *
+     * @param parameters 目标方法入参
+     * @return 逗号分隔的参数文本；无有效参数时返回 null
+     */
+    private static String renderParams(Object[] parameters) {
+        if (parameters == null || parameters.length == 0) {
+            return null;
+        }
+        StringBuilder builder = new StringBuilder(64);
+        for (Object parameter : parameters) {
+            String text = ArrayUtils.toString(parameter, "");
+            if (text.isEmpty()) {
+                continue;
+            }
+            if (builder.length() > 0) {
+                builder.append(',');
+            }
+            builder.append(text);
+        }
+        return builder.length() == 0 ? null : truncate(builder.toString(), MAX_PARAMS_LENGTH);
+    }
+
+    /**
+     * 把方法返回值渲染成文本。
+     * 未重写 toString 的 POJO 仍只得到对象哈希 —— 这是已知限制：彻底解决需要
+     * JSON 序列化，而 Jackson 只是 spring-boot-starter-web 的传递依赖（provided），
+     * 硬用会让模块在无 Jackson 的宿主里抛 NoClassDefFoundError。
+     *
+     * @param result 目标方法返回值
+     * @return 返回值文本；result 为 null 时返回 null
+     */
+    private static String renderResult(Object result) {
+        if (result == null) {
+            return null;
+        }
+        return truncate(ArrayUtils.toString(result, ""), MAX_RESULT_LENGTH);
+    }
+
+    /**
+     * 超长截断，与宿主消费端的既有约定保持一致。
+     *
+     * @param text 原始文本
+     * @param max  最大保留长度
+     * @return 截断后的文本
+     */
+    private static String truncate(String text, int max) {
+        return text.length() <= max ? text : text.substring(0, max) + "...(truncated)";
+    }
+
+    /**
+     * 把异常写入日志记录。
+     * ExceptionUtils.getStackTrace 的内部实现与原先手写的
+     * StringWriter + PrintWriter(sw, true) + printStackTrace 逐字符等价，
+     * 落库内容不变，但少分配两个对象且不再重复渲染堆栈。
+     *
+     * @param sysLogDto 待填充的日志对象
+     * @param e         捕获到的异常
+     */
+    private static void markAsException(SysLogDto sysLogDto, Exception e) {
+        sysLogDto.setContent(null);
+        sysLogDto.setType(GlobalConst.EX);
+        sysLogDto.setExDesc("日志记录异常");
+        sysLogDto.setExDetail(ExceptionUtils.getStackTrace(e));
+    }
 
     /**
      * around日志记录
