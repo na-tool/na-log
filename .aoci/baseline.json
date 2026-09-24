@@ -1,0 +1,327 @@
+{
+  "version": 1,
+  "created_at": "2026-09-24T05:38:03Z",
+  "updated_at": "2026-09-24T09:44:40Z",
+  "files": {
+    ".gitattributes": {
+      "sha256": "21fa16a2122e2b0360b47502c577428b645437e08e9e87ffba661f84853cb476",
+      "size": 291,
+      "normalized_sha256": "21fa16a2122e2b0360b47502c577428b645437e08e9e87ffba661f84853cb476"
+    },
+    ".gitignore": {
+      "sha256": "5c9034fa3e8e4bd0b8d44adf7514b8cbe793114d34c9c07b467a18ac9685c1ee",
+      "size": 644,
+      "normalized_sha256": "5c9034fa3e8e4bd0b8d44adf7514b8cbe793114d34c9c07b467a18ac9685c1ee"
+    },
+    ".idea/.gitignore": {
+      "sha256": "e2e37ed60c50d8e41c42aa9f3505642a5f1689e67fb6bc7fe8a06dab09a0fa96",
+      "size": 50,
+      "normalized_sha256": "a9e54fc4f08bc97d82c04bd86ff37d3af84ba9ef4ad87fcfcb438dab622e8aaa"
+    },
+    ".idea/encodings.xml": {
+      "sha256": "72bf29f40c3272669f3f6f48e0aeb9ff0b17fec9e4e41a3ffb43c4e42777f891",
+      "size": 191,
+      "normalized_sha256": "d2f61d3ce9654a13e858ce01d14cd0149cefcf814bc3133de4d5859f57451c66"
+    },
+    ".idea/misc.xml": {
+      "sha256": "3478fa90f1278632b2ccbd9b50591328896530ee2c1d66dd21a34ebe297b2e40",
+      "size": 465,
+      "normalized_sha256": "b807ae8e1d4d82eca3fe002287d32feef89748a4f811c8873aed87a6a7c355ef"
+    },
+    ".idea/vcs.xml": {
+      "sha256": "70c5bb484963749784ed07cedfeec9b7ad1989f754bf6d5808f645a0deea2e35",
+      "size": 241,
+      "normalized_sha256": "053fc3997d1add58267857f18824b31e8bf3e2eec5421193b29e9824a30b8d3b"
+    },
+    "AGENTS.md": {
+      "sha256": "ddb50101a5be7eb54bde0bdccb2ce15fbac13a0efed1b2851adc248c7a39bcb7",
+      "size": 13258,
+      "normalized_sha256": "ddb50101a5be7eb54bde0bdccb2ce15fbac13a0efed1b2851adc248c7a39bcb7"
+    },
+    "aoci.code.txt": {
+      "sha256": "b14ba3dd2fefd6ae3ded224b4ae2b79327eab04ddc3272e44615b756aadbea59",
+      "size": 15601,
+      "normalized_sha256": "b14ba3dd2fefd6ae3ded224b4ae2b79327eab04ddc3272e44615b756aadbea59"
+    },
+    "aoci.meta.txt": {
+      "role": "index",
+      "sha256": "60ffea0527ae0e1e2b5bf822c119cd3141118cdd33479dec063ee5f9c2114126",
+      "size": 1900,
+      "normalized_sha256": "60ffea0527ae0e1e2b5bf822c119cd3141118cdd33479dec063ee5f9c2114126"
+    },
+    "aoci.txt": {
+      "role": "index",
+      "sha256": "98f970f12257d6804c34c4beabb847204a24b454ca30468e2cf334720ef10b5f",
+      "size": 295,
+      "normalized_sha256": "98f970f12257d6804c34c4beabb847204a24b454ca30468e2cf334720ef10b5f"
+    },
+    "help.md": {
+      "sha256": "26d7a89ae626c73c1c4bab099cc95c076e066b9e1b1d5eff187017b466fdc2d0",
+      "size": 7842,
+      "normalized_sha256": "26d7a89ae626c73c1c4bab099cc95c076e066b9e1b1d5eff187017b466fdc2d0"
+    },
+    "pom.xml": {
+      "sha256": "efee44fa9faef2603695438eb9fe51f3b727d660861358741b9f0dbf5575206c",
+      "size": 6069,
+      "normalized_sha256": "efee44fa9faef2603695438eb9fe51f3b727d660861358741b9f0dbf5575206c"
+    },
+    "src/main/java/com/na/syslog/ILogFormatter.java": {
+      "sha256": "1dd2c87079f5da4edd3fb6d9836e2db429799cf162da28ed1d8bfefc713c7a67",
+      "size": 573,
+      "normalized_sha256": "12c2d5dadd29a1c2e8f5d60515de138dafe565275a76d0563479bcf10196c8e3"
+    },
+    "src/main/java/com/na/syslog/INaLogFormatter.java": {
+      "sha256": "6e5cbf4fe53479f61ae8197b5e8c71e9712984dd4227f375348c245e6b63fe45",
+      "size": 587,
+      "normalized_sha256": "f1ecbd9c1b1a47ba279ae90f42d8e87ed1b3c064b4f7a3c3965d5eb34f295818"
+    },
+    "src/main/java/com/na/syslog/LogFormatterContext.java": {
+      "sha256": "877e1b98e380bfa12506c9e704932f6bb45423f4ba4eb7c29d517549dc5790ad",
+      "size": 1669,
+      "normalized_sha256": "b7ccffc26595bdcca137b3e04d7a5bc5689e9d85b0a58222291727740e51c282"
+    },
+    "src/main/java/com/na/syslog/NaLogFormatterContext.java": {
+      "sha256": "d39c1ee69365b32a98b8f763c365d790c7e89772392025d8ddc62aa46c15aad4",
+      "size": 1681,
+      "normalized_sha256": "2f1191a45346d05663089d318cea174b856511a6b24dc14063e68033c1a790ac"
+    },
+    "src/main/java/com/na/syslog/NaOperationLogAspect.java": {
+      "sha256": "cbac478135634f306067763cefba6086cdd01194926ca2b07cd268311b5d6996",
+      "size": 13537,
+      "normalized_sha256": "dc333727f618adb5efd514c30747ea405af92ace5a656feacad67c0af8b51fa5"
+    },
+    "src/main/java/com/na/syslog/OperationLogAspect.java": {
+      "sha256": "68c4199c94e4e83e9734fd70070b662942508d49a7bf43079bd00e2eee25e8f6",
+      "size": 14066,
+      "normalized_sha256": "68c4199c94e4e83e9734fd70070b662942508d49a7bf43079bd00e2eee25e8f6"
+    },
+    "src/main/java/com/na/syslog/annotation/NaOperationLog.java": {
+      "sha256": "bb5b7a2e11ac35bb9ae93d01226b6be128eb260bea7b313c57e97d4ea495e1f1",
+      "size": 362,
+      "normalized_sha256": "3c9c3159a02e6bae77e8b42cf25548c049f55dadc2bc5c2b23a96af60ab60cca"
+    },
+    "src/main/java/com/na/syslog/annotation/OperationLog.java": {
+      "sha256": "e47d6821769ef371272855d4cb71a71199c8caf42e51bb3a197acd1530499fed",
+      "size": 352,
+      "normalized_sha256": "496dde69690bc806cb64ead541f679383757752753070fef300e87199b723ed4"
+    },
+    "src/main/java/com/na/syslog/config/AsyncSysLogThreadPoolConfig.java": {
+      "sha256": "80cf34b6aeec13dc7df1bd8aaa77e5c1132a32b45baf527ce1bd80c43baf32a7",
+      "size": 879,
+      "normalized_sha256": "8892a9702bbb6375bafd283ff46c6854082326347c2d16c003fc699d44d34717"
+    },
+    "src/main/java/com/na/syslog/config/AutoLogConfig.java": {
+      "sha256": "3c3aade7c93b6cb776a0639a1a3449cb9c3533e5082d3fcdc3c97de44818d0ad",
+      "size": 477,
+      "normalized_sha256": "bf63720150324eac36b74ce9ad06c82916c31419abaf56f01c1ff4f944e09083"
+    },
+    "src/main/java/com/na/syslog/config/LogAutoConfiguration.java": {
+      "sha256": "16e9f062cbfcacbff6040b8ed2ee3c45e87e5cad9b84624ec591ce447733d22d",
+      "size": 4741,
+      "normalized_sha256": "16e9f062cbfcacbff6040b8ed2ee3c45e87e5cad9b84624ec591ce447733d22d"
+    },
+    "src/main/java/com/na/syslog/config/NaAutoLogConfig.java": {
+      "sha256": "ed57d026b1dd2aee47dcc47fddf91d330ed0c623cbe8f1f08bfd099cdb32f857",
+      "size": 510,
+      "normalized_sha256": "5eff1ce4dce774ab434535d12e517a7eb7e9c31496459b9d520a318b1465b06d"
+    },
+    "src/main/java/com/na/syslog/config/NaLogAutoConfiguration.java": {
+      "sha256": "55a5d442c2406f504df2bd389841383e513e911ba1dcf2b0e06f17845631a02e",
+      "size": 2910,
+      "normalized_sha256": "55a5d442c2406f504df2bd389841383e513e911ba1dcf2b0e06f17845631a02e"
+    },
+    "src/main/java/com/na/syslog/dto/SysLogDto.java": {
+      "sha256": "004ee9ac0130955ce8e036bda6f7c7a4cc83624d2e82908aed5e5884053f4ab2",
+      "size": 1508,
+      "normalized_sha256": "e007eb7179c50500f2444b2c0878554d7ae300d2c7bf024ba3c65e52ee7efd02"
+    },
+    "src/main/java/com/na/syslog/enums/IModelProvider.java": {
+      "sha256": "84b6bc923bad1f4492ab26558ebb1bb3e429bcc6d6b8ee62711846ae507f0241",
+      "size": 118,
+      "normalized_sha256": "2d0f380997339236a0d93f02952a0adfb075bd6f6aec277ab96217031e9a4d46"
+    },
+    "src/main/java/com/na/syslog/enums/INaModelProvider.java": {
+      "sha256": "c6ffac5c0504ec68456bd0e412e2f50738f82bc755f9737be4aec71b7e7a1d68",
+      "size": 120,
+      "normalized_sha256": "a263fc4d938a2ae797c493980adcb9e9374d33a896107b4663fe32a0ef4324d4"
+    },
+    "src/main/java/com/na/syslog/enums/INaOperateProvider.java": {
+      "sha256": "312bf3a4ce295e47be3edf181cd81ab0cae0379eb4b6da890c5e1b71ea8af6e2",
+      "size": 124,
+      "normalized_sha256": "dc5a1da1f4087eb0b390dedb4ac884f7e29652dd0821b2e772914782a0fec307"
+    },
+    "src/main/java/com/na/syslog/enums/IOperateProvider.java": {
+      "sha256": "18a27d4507864fd2f17d39ac4c8312f5ba2391abf0e645972a22933685442b6e",
+      "size": 122,
+      "normalized_sha256": "c34c951a4df4f4ebf75ea1234661d7e20db880999e48ea4b219588093a60427f"
+    },
+    "src/main/java/com/na/syslog/enums/ModuleEnum.java": {
+      "sha256": "99d3f8532763a024e5de8cc25435b2f28649e02c0c838534c96b3f8aafdadad0",
+      "size": 1588,
+      "normalized_sha256": "fa04993827d87d6e82700a840fc509eceb14a317a4944646404a5bbf3a702a20"
+    },
+    "src/main/java/com/na/syslog/enums/NaModuleEnum.java": {
+      "sha256": "8801d82e5e35786521d2f1afe3dc80b0102e7c05d0375c130a58c644d90c6e8b",
+      "size": 1594,
+      "normalized_sha256": "3b51692cc38e237db326428e94170856ccb41fbd272398988ec8261bbb399d53"
+    },
+    "src/main/java/com/na/syslog/enums/NaOperateEnum.java": {
+      "sha256": "af2994fb22855b2ab486e49e94733d638403a0aaf5903a427a6f5d7f3b21abf3",
+      "size": 1308,
+      "normalized_sha256": "f744438cd47c87a171dc3ebb4cd8b941c9f402bd86f342d365f04e50061b2897"
+    },
+    "src/main/java/com/na/syslog/enums/OperateEnum.java": {
+      "sha256": "3d41cff4d7e1daea820c5226a258c2f0ddd52027aa1e09805938191f3b10e552",
+      "size": 1302,
+      "normalized_sha256": "f676eead6307f9cb310fd032c376eed2ed4f120938d905e72c26974a98568122"
+    },
+    "src/main/java/com/na/syslog/event/SysLogEvent.java": {
+      "sha256": "a37e91e114efafaeaedaea867ffa746e7ec168bffa2eecbf0e688f2c18f53f25",
+      "size": 303,
+      "normalized_sha256": "c9fcbea9fbf0d32e22ce57c70cc6d5369ca43e41f3dde855d85ad773b9a6a988"
+    },
+    "src/main/java/com/na/syslog/event/SysLogListener.java": {
+      "sha256": "1bff195d74f0675cc558aa7ae6d302eaeddfccf12e104ad581b3a51db94580c8",
+      "size": 2537,
+      "normalized_sha256": "8719b9cd27277556f61c89b48c2d16681a264584ec407f5f81eb8125eb3a8f42"
+    },
+    "src/main/java/com/na/syslog/formatter/DefFormatter.java": {
+      "sha256": "7f05ccc187724fca4a664444c8d1f677d3d291ae9c9455d24bddd19d9ca14165",
+      "size": 785,
+      "normalized_sha256": "cc38d9e22914e2586257a8e4ff0387afe5af5f70209568887c6698c2ae3b08af"
+    },
+    "src/main/java/com/na/syslog/formatter/DefFormatterNa.java": {
+      "sha256": "0d5dfd9bc6cb38ffe61dc17748feeb1117f13dd6c50dd304615700f6b171d2b5",
+      "size": 811,
+      "normalized_sha256": "6212a0ed80523c28cf6beb882faa6edb8f1a168e202fbcebd9ef42d2e34408f3"
+    },
+    "src/main/java/com/na/syslog/utils/DateTimeUtils.java": {
+      "sha256": "8e5566e892f190a742eb3bb0a80da9a675c704a4019a4e05dba8afa9931fdb23",
+      "size": 1217,
+      "normalized_sha256": "8e5566e892f190a742eb3bb0a80da9a675c704a4019a4e05dba8afa9931fdb23"
+    },
+    "src/main/java/com/na/syslog/utils/LogEventUtil.java": {
+      "sha256": "edc70de54cbbc6ec159ceeddc87edd3c30d8254b14cd3818e1b42a1bb69aba7c",
+      "size": 1005,
+      "normalized_sha256": "edc70de54cbbc6ec159ceeddc87edd3c30d8254b14cd3818e1b42a1bb69aba7c"
+    },
+    "src/main/java/com/na/syslog/utils/WebUtils.java": {
+      "sha256": "bf5d48d16235be35c65ff99e3a7eac97a27512bd84af8e86d4990bc1eea22a7a",
+      "size": 4574,
+      "normalized_sha256": "bf5d48d16235be35c65ff99e3a7eac97a27512bd84af8e86d4990bc1eea22a7a"
+    },
+    "src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports": {
+      "sha256": "933662fd7715391fd09a56cb4e57ab90710a6aa468fbc349dc988cd270a3d917",
+      "size": 42,
+      "normalized_sha256": "933662fd7715391fd09a56cb4e57ab90710a6aa468fbc349dc988cd270a3d917"
+    },
+    "src/main/resources/help.html": {
+      "sha256": "5049eb36bb3e54dbead9d345ad0b6e8f672e293206603a6f2f4d6cb5714787e3",
+      "size": 11789,
+      "normalized_sha256": "d777ec7dc1d30826a993a3160921e4d0cce9c7ad40c862cdd01177dd3ac58362"
+    },
+    "src/main/resources/help.md": {
+      "sha256": "26d7a89ae626c73c1c4bab099cc95c076e066b9e1b1d5eff187017b466fdc2d0",
+      "size": 7842,
+      "normalized_sha256": "26d7a89ae626c73c1c4bab099cc95c076e066b9e1b1d5eff187017b466fdc2d0"
+    },
+    "src/test/java/com/na/syslog/OperationLogAspectTest.java": {
+      "sha256": "bb71874f50bd042ad37a3c9ad51c129fe2f806f0e36251a4fc72fd456802de74",
+      "size": 6919,
+      "normalized_sha256": "bb71874f50bd042ad37a3c9ad51c129fe2f806f0e36251a4fc72fd456802de74"
+    },
+    "src/test/java/com/na/syslog/config/LogAutoConfigurationTest.java": {
+      "sha256": "597573cda9a29ab710b417fa8e223393f24061d2da9fd6a64cf8823975f42cef",
+      "size": 4129,
+      "normalized_sha256": "597573cda9a29ab710b417fa8e223393f24061d2da9fd6a64cf8823975f42cef"
+    },
+    "src/test/java/com/na/syslog/controller/TestController.java": {
+      "sha256": "478f5028a147812156a59bb1e1ad2b5096faf2cde80b792f44a31d52a3d7c64f",
+      "size": 833,
+      "normalized_sha256": "478f5028a147812156a59bb1e1ad2b5096faf2cde80b792f44a31d52a3d7c64f"
+    },
+    "src/test/java/com/na/syslog/controller/TestFormatter.java": {
+      "sha256": "6ec579c5e0b448fb1a7c27c4fec97da5e4d7159409dcbbff11b81827b76e22c6",
+      "size": 1167,
+      "normalized_sha256": "6ec579c5e0b448fb1a7c27c4fec97da5e4d7159409dcbbff11b81827b76e22c6"
+    },
+    "src/test/java/com/na/syslog/utils/DateTimeUtilsTest.java": {
+      "sha256": "708a219f98df05cea335a1d9e326c2d2d9226bd70480bec495ef5da997009d14",
+      "size": 1484,
+      "normalized_sha256": "708a219f98df05cea335a1d9e326c2d2d9226bd70480bec495ef5da997009d14"
+    },
+    "src/test/java/com/na/syslog/utils/WebUtilsTest.java": {
+      "sha256": "629540b32477cd175d961c0d6d450809a8f655e103d42c5ff2337811e928b64e",
+      "size": 2955,
+      "normalized_sha256": "629540b32477cd175d961c0d6d450809a8f655e103d42c5ff2337811e928b64e"
+    }
+  },
+  "managed_scope": {
+    "version": "managed-scope-baseline/v1",
+    "policy_identity": "81421936ffa2228995783d12046110aa7b7759d131ce244b24bf0a69a61c9264",
+    "observe_change_policy": "review_required",
+    "budget_policy_identity": "15e9b37a6c57e9bf03c9df3d0d049eb5b9a7f5540f9d34960408114e2538a32d",
+    "budget_policy": {
+      "version": "cognition-budget-policy/v1",
+      "mode": "enforce",
+      "whole_index": {
+        "target_tokens": 200000,
+        "warning_tokens": 300000,
+        "max_tokens": 400000
+      },
+      "r": [
+        {
+          "min_c": 1,
+          "max_c": 4,
+          "target_tokens": 25,
+          "max_tokens": 50
+        },
+        {
+          "min_c": 5,
+          "max_c": 7,
+          "target_tokens": 45,
+          "max_tokens": 90
+        },
+        {
+          "min_c": 8,
+          "max_c": 8,
+          "target_tokens": 70,
+          "max_tokens": 140
+        },
+        {
+          "min_c": 9,
+          "max_c": 9,
+          "target_tokens": 90,
+          "max_tokens": 180
+        }
+      ],
+      "s": [
+        {
+          "min_c": 1,
+          "max_c": 4,
+          "target_tokens": 20,
+          "max_tokens": 40
+        },
+        {
+          "min_c": 5,
+          "max_c": 7,
+          "target_tokens": 40,
+          "max_tokens": 80
+        },
+        {
+          "min_c": 8,
+          "max_c": 8,
+          "target_tokens": 70,
+          "max_tokens": 140
+        },
+        {
+          "min_c": 9,
+          "max_c": 9,
+          "target_tokens": 100,
+          "max_tokens": 200
+        }
+      ]
+    },
+    "apply_authorization_mode": "auto"
+  }
+}

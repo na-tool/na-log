@@ -1,0 +1,66 @@
+#AOCI-CODE-VOLUME: 1
+
+===D:/dev/PG/na-tools/na-log/===
+.gitattributes[FV5T]: F:声明全仓文本文件以 LF 检出，使任何平台的工作树字节一致 | R:- | A:单条规则 * text=auto eol=lf；二进制由 git 自动识别不处理 | S:AOCI 基线按原始字节取哈希，本文件是索引稳定性的前置条件，改成 autocrlf 会让整棵树被判 stale
+.gitignore[FV6T]: F:声明 Git 忽略规则，并因此界定 AOCI 托管范围的边界 | R:- | A:忽略 target/、IDE 与系统临时文件；尾部含 aoci init 写入的 .mcp.json 与 .mcp.json.backup.* | S:scan 以 git 忽略为权威取文件，把 aoci.txt、aoci.meta.txt、aoci.code.txt、AGENTS.md 加进忽略规则会被静默跳过，索引建不起来
+AGENTS.md[SC9S]: F:规定本仓库 AOCI 认知层的接入、使用与收尾原则，是 Agent 在本仓工作的最高指令来源 | R:code:aoci.txt,code:aoci.meta.txt,code:aoci.code.txt | A:定义 aoci 区块与最小工具入口（aoci_rules/overview/maintain/update_entry/report），并规定建立、恢复、维护的强制顺序 | S:本文件本身受 AOCI 托管并纳入基线与索引，改动会触发认知维护；与 aoci_rules 合同、Guide 和工具 Schema 冲突时以后者为准
+help.md[SO6M]: F:na-log 3.0.0 的接入契约文档：依赖坐标、provided 依赖清单、配置项与装配说明 | R:code:src/main/resources/help.md | A:覆盖 @OperationLog 用法、自定义枚举与 Formatter、异步落库监听器、异常落库行为、线程池拒绝策略与从 1.x 升级对照表 | S:仓库里唯一记录接入契约的文档；升级对照表按 1.1.0.3 sources jar 核实的真实类名编写，此前旧文档长期与代码不符
+pom.xml[FV9S]: F:na-log 的 Maven 构建与发布声明：坐标、Java 版本、父工程与 Sonatype Central 发布链路 | R:- | A:坐标 io.github.na-tool:na-log:3.0.0，packaging jar，Java 17，父工程 Spring Boot 3.5.16，依赖全部为 provided | S:宿主必须自带 Spring Boot Web、aspectjweaver 与 commons-lang3(>=3.18.0，低版本受 CVE-2025-48924 影响)；发布强制 GPG 签名且 autoPublish=false，需人工确认
+
+===D:/dev/PG/na-tools/na-log/.idea/===
+.gitignore[XZ2T]: F:屏蔽 IDEA 的个人工程状态文件 | R:- | A:两条规则 /shelf/ 与 /workspace.xml | S:-
+encodings.xml[XZ3T]: F:把 src/main/java 目录的编码固定为 UTF-8 | R:- | A:单条 file-url 映射，charset=UTF-8 | S:源码含中文注释，编码漂移会造成乱码与编译错误
+misc.xml[XZ4T]: F:IDEA 工程元数据：Maven 工程绑定与 Java 语言级别 | R:code:pom.xml | A:MavenProjectsManager 指向 pom.xml；ProjectRootManager 声明 JDK_1_8 | S:JDK 声明仍是 1.8，与 pom.xml 的 Java 17 目标不一致，属遗留未同步；编译以 Maven 为准
+vcs.xml[XZ2T]: F:声明 IDEA 的 Git 根目录映射 | R:- | A:同时把 $PROJECT_DIR$ 与其父目录 .. 登记为 Git 根 | S:父目录也被登记，说明本模块位于 na-tools 聚合目录下
+
+===D:/dev/PG/na-tools/na-log/src/main/resources/===
+help.md[SO6M]: F:随 jar 分发的使用文档，内容与仓库根 help.md 完全一致 | R:code:help.md | A:覆盖依赖坐标、provided 依赖清单、na.log 配置、自动装配、Formatter 示例与 1.x 升级对照表 | S:与根 help.md 必须保持一致；同目录的 help.html 已删除，不要再引入第二份不会自动同步的副本
+
+===D:/dev/PG/na-tools/na-log/src/main/resources/META-INF/spring/===
+org.springframework.boot.autoconfigure.AutoConfiguration.imports[FC8T]: F:声明 na-log 的自动装配入口类，使宿主无需包名匹配即可装配本模块 | R:code:src/main/java/com/na/syslog/config/LogAutoConfiguration.java | A:单行内容 com.na.syslog.config.LogAutoConfiguration；类上必须同时有 @AutoConfiguration | S:类名以字符串形式写在此文件中，编译器不检查；写成已改名的旧类名会让宿主启动抛 IllegalStateException
+
+===D:/dev/PG/na-tools/na-log/src/main/java/com/na/syslog/===
+ILogFormatter.java[LO8T]: F:日志格式化 SPI，接入方实现它决定日志的业务内容、模块与操作类型 | R:code:src/main/java/com/na/syslog/LogFormatterContext.java,code:src/main/java/com/na/syslog/enums/IModelProvider.java,code:src/main/java/com/na/syslog/enums/IOperateProvider.java | A:四个方法：beforeContext/afterContext 在目标方法前后回调，module()/operate() 返回模块与操作枚举，实现类须注册为 Spring Bean | S:beforeContext 抛异常会被切面降级为 type=ex 记录，此时 afterContext 不再执行，业务方法仍正常返回
+LogFormatterContext.java[LO7T]: F:格式化回调的上下文载体，向 Formatter 暴露请求、响应、目标方法与参数，并回传内容与用户标识 | R:code:src/main/java/com/na/syslog/ILogFormatter.java | A:request/response/className/method/parameters 为构造期注入的 final 字段；result、contextData、content、userId、tenantId 为可变回填字段；servlet 类型为 jakarta | S:不要改回 @Data：它生成的 toString/hashCode 会对 Object[] parameters 递归，contextData 又可塞任意对象，一次 debug 日志就可能触发懒加载
+OperationLogAspect.java[MO9M]: F:日志采集核心切面：环绕拦截带 @OperationLog 的方法，组装 SysLogDto 并发布异步落库事件 | R:code:src/main/java/com/na/syslog/annotation/OperationLog.java,code:src/main/java/com/na/syslog/ILogFormatter.java,code:src/main/java/com/na/syslog/LogFormatterContext.java,code:src/main/java/com/na/syslog/config/AutoLogConfig.java,code:src/main/java/com/na/syslog/config/LogAutoConfiguration.java | A:@Order(2) 的 Around 通知；切点匹配 com.na.controller 包方法或任意 *controller* 包内含注解的公有方法；由 LogAutoConfiguration 以 @Bean 注册并构造器注入 | S:切点里的注解名是字符串字面量，改名后不同步会让切面静默失效；业务异常先落 ex 记录再原样抛出；actionMethod 取反射 Method 名而非 classPath 尾段
+
+===D:/dev/PG/na-tools/na-log/src/main/java/com/na/syslog/annotation/===
+OperationLog.java[LO8T]: F:方法级注解，标记需要记录操作日志的方法并指定格式化器 | R:code:src/main/java/com/na/syslog/ILogFormatter.java,code:src/main/java/com/na/syslog/formatter/DefFormatter.java | A:@Target(METHOD)、RUNTIME 保留；formatter() 默认 DefFormatter.class | S:切点要求同时命中 controller 包与注解，漏写注解不会报错，只会静默不记录
+
+===D:/dev/PG/na-tools/na-log/src/main/java/com/na/syslog/config/===
+AutoLogConfig.java[FC8T]: F:绑定 na.log 前缀配置项，控制日志采集开关与中文描述切换 | R:code:src/main/java/com/na/syslog/OperationLogAspect.java,code:src/main/java/com/na/syslog/config/LogAutoConfiguration.java | A:两个 boolean 项 enabled（默认 true）与 cn（默认 false）；不标 @Component，由 LogAutoConfiguration 的 @EnableConfigurationProperties 注册 | S:字段是基本类型 boolean，Lombok 访问器为 isEnabled()/isCn()；改回 Boolean 会让配置项留空时拆箱 NPE
+LogAutoConfiguration.java[EC9S]: F:na-log 的 Spring Boot 自动装配入口，注册事件发布器、采集切面与日志专用线程池 | R:code:src/main/java/com/na/syslog/OperationLogAspect.java,code:src/main/java/com/na/syslog/config/AutoLogConfig.java,code:src/main/java/com/na/syslog/utils/LogEventUtil.java,code:src/main/resources/META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports | A:@AutoConfiguration + @EnableAsync + @EnableConfigurationProperties；三个 @Bean 均带 @ConditionalOnMissingBean 可被宿主覆盖；线程池显式声明拒绝策略 | S:@EnableAsync 随本类对所有宿主生效；线程池饱和时丢弃本次日志并每秒最多告警一次；na-log 自身无可被扫描命中的类，与宿主的 @ComponentScan 可共存
+
+===D:/dev/PG/na-tools/na-log/src/main/java/com/na/syslog/dto/===
+SysLogDto.java[LO9T]: F:操作日志的数据载体，切面填充后经事件交给宿主监听器落库 | R:code:src/main/java/com/na/syslog/OperationLogAspect.java,code:src/main/java/com/na/syslog/event/SysLogEvent.java | A:字段与落库列一一对应（id/requestIp/type/classPath/actionMethod/params/result/exDesc/exDetail/时间字段/module/operate/ext 等）；常量 TYPE_NORMAL 与 TYPE_EX | S:刻意不含 request/response：事件是异步消费的，回调时请求对象可能已被容器回收，跨线程传递会读到脏数据或抛 IllegalStateException
+
+===D:/dev/PG/na-tools/na-log/src/main/java/com/na/syslog/enums/===
+IModelProvider.java[LO6T]: F:模块字典提供者契约，接入方实现它以提供自定义模块枚举 | R:code:src/main/java/com/na/syslog/enums/ModuleEnum.java | A:两个方法：getCode() 返回落库的模块码，getDesc() 返回中文描述 | S:getCode() 的返回值直接写入日志的 module 字段，改动会与历史记录语义不一致
+IOperateProvider.java[LO6T]: F:操作字典提供者契约，接入方实现它以提供自定义操作枚举 | R:code:src/main/java/com/na/syslog/enums/OperateEnum.java | A:两个方法：getCode() 返回落库的操作码，getDesc() 返回中文描述 | S:getCode() 的返回值直接写入日志的 operate 字段，改动会与历史记录语义不一致
+ModuleEnum.java[LO7T]: F:内置模块字典，提供 16 个默认模块码，覆盖登录登出、租户、用户、角色、菜单、权限、日志、第三方与认证等 | R:code:src/main/java/com/na/syslog/enums/IModelProvider.java | A:实现 IModelProvider，每个常量携带 code 与中文 desc | S:desc 仅在 na.log.cn=true 时覆盖 code 落库，默认记录 code；本枚举的解绑码是 UN_BIND，而 OperateEnum 用 UNBIND，同名不同值
+OperateEnum.java[LO7T]: F:内置操作字典，提供 16 个默认操作码，覆盖增删改查、检测、登录登出、上传下载、转换、绑定解绑与授权 | R:code:src/main/java/com/na/syslog/enums/IOperateProvider.java | A:实现 IOperateProvider，每个常量携带 code 与中文 desc | S:常量名 UN_BIND 的 code 值是 UNBIND，名与值不一致，检索按 code；desc 仅在 na.log.cn=true 时落库
+
+===D:/dev/PG/na-tools/na-log/src/main/java/com/na/syslog/event/===
+SysLogEvent.java[LM7T]: F:承载操作日志的应用事件，由 LogEventUtil 发布、宿主监听器异步消费 | R:code:src/main/java/com/na/syslog/dto/SysLogDto.java,code:src/main/java/com/na/syslog/utils/LogEventUtil.java | A:继承 ApplicationEvent，getSource() 返回 SysLogDto | S:宿主监听器应按 SysLogEvent 类型订阅并标注 @Async("sysLogThreadPool")；监听器写库失败发生在异步线程，切面无法感知也无法兼底
+
+===D:/dev/PG/na-tools/na-log/src/main/java/com/na/syslog/formatter/===
+DefFormatter.java[LO7T]: F:日志格式化 SPI 的默认实现，不做内容加工，仅返回默认模块与默认操作 | R:code:src/main/java/com/na/syslog/ILogFormatter.java,code:src/main/java/com/na/syslog/enums/ModuleEnum.java,code:src/main/java/com/na/syslog/enums/OperateEnum.java | A:@Component 注册；beforeContext/afterContext 为空实现；module() 返回 DEF_MODEL，operate() 返回 DEF_OPT | S:是 @OperationLog 的默认 formatter，未显式指定时日志固定记为 DEF_MODEL/DEF_OPT，业务语义需接入方自行替换
+
+===D:/dev/PG/na-tools/na-log/src/main/java/com/na/syslog/utils/===
+DateTimeUtils.java[CG5T]: F:时间相关的内置工具，取代原先对 na-common 的依赖 | R:- | A:getCurrentBeijingDateTime() 返回北京时区墙上时钟；calculateTimeDifference(start,end) 返回两者毫秒差 | S:时区硬编码 Asia/Shanghai，与宿主默认时区无关；calculateTimeDifference 对 null 参数返回 null 而非抛异常
+LogEventUtil.java[CM7T]: F:日志事件发布器，把 SysLogDto 包装成 SysLogEvent 交给 ApplicationContext 派发 | R:code:src/main/java/com/na/syslog/dto/SysLogDto.java,code:src/main/java/com/na/syslog/event/SysLogEvent.java | A:构造器注入 ApplicationContext；publishEvent(SysLogDto) 同步派发 | S:不带 @Component，由 LogAutoConfiguration 以 @Bean 注册；带组件注解会在宿主扫描到 com.na 时重复注册
+WebUtils.java[CN6S]: F:Web 请求相关的内置工具，取代原先对 na-common 的依赖 | R:- | A:getCurrentRequest/getCurrentResponse 取当前线程绑定对象；getIpAddress 按 9 个代理头优先级取真实 IP，多级代理取首个，IPv6 回环映射为 IPv4 | S:代理头可被客户端伪造，依赖它做安全控制必须确保请求经过可信代理；回环地址会触发 InetAddress.getLocalHost()，可能做反向 DNS
+
+===D:/dev/PG/na-tools/na-log/src/test/java/com/na/syslog/===
+OperationLogAspectTest.java[TO8S]: F:采集切面的集成测试：用真实 Spring 上下文与真实代理调用验证记录、跳过与降级 | R:code:src/main/java/com/na/syslog/OperationLogAspect.java,code:src/test/java/com/na/syslog/controller/TestController.java,code:src/test/java/com/na/syslog/controller/TestFormatter.java | A:覆盖正常记录、业务异常先记录后原样抛出、enabled=false 跳过、无请求上下文跳过、Formatter 异常降级、无注解不采集、cn=true 写中文描述 | S:刻意走真实织入而非单测私有方法——切点里的注解名是字符串字面量，只有走一遍切面才能发现写错；TestController 包名含 controller 段就是为了命中切点
+
+===D:/dev/PG/na-tools/na-log/src/test/java/com/na/syslog/config/===
+LogAutoConfigurationTest.java[TO8S]: F:自动装配的加载与注册测试 | R:code:src/main/java/com/na/syslog/config/LogAutoConfiguration.java | A:校验自动装配声明里的类名可加载、默认注册切面与发布器与配置项与线程池、宿主自带同类型 Bean 时让位、配置项默认值 | S:类名断言只针对 com.na.syslog 前缀的候选，classpath 上其他 jar 的自动装配可能依赖本模块没有的可选依赖
+
+===D:/dev/PG/na-tools/na-log/src/test/java/com/na/syslog/controller/===
+TestController.java[TO5T]: F:测试用的伪控制器，提供带注解与不带注解的方法 | R:code:src/main/java/com/na/syslog/annotation/OperationLog.java | A:ok(String) 正常返回；boom() 抛 IllegalStateException；notAnnotated() 不带注解 | S:包名必须包含 controller 段（com.na.syslog.controller），否则命中不了切点的 within 分支，测试会失去意义
+TestFormatter.java[TO4T]: F:测试用的 Formatter 实现，可通过 failBefore 模拟前置处理抛异常 | R:code:src/main/java/com/na/syslog/ILogFormatter.java | A:实现 ILogFormatter 四个方法；beforeContext 写内容、用户与租户；failBefore=true 时抛异常 | S:不需 @Component，由测试配置以 @Bean 注册；切面是按注解指定的类型从容器取 Bean 的
+
+===D:/dev/PG/na-tools/na-log/src/test/java/com/na/syslog/utils/===
+DateTimeUtilsTest.java[TG3T]: F:DateTimeUtils 的单元测试 | R:code:src/main/java/com/na/syslog/utils/DateTimeUtils.java | A:校验北京时区取时（与期望值相差不超过 5 秒）、毫秒差计算、null 参数返回 null | S:取时用例用时间窗口比对而非等值，避免跨秒抖动导致的偶发失败
+WebUtilsTest.java[TN5T]: F:WebUtils 的单元测试，覆盖 IP 提取与请求上下文取用 | R:code:src/main/java/com/na/syslog/utils/WebUtils.java | A:校验 X-Forwarded-For 优先、多级代理取首个、unknown 跳过、回退远程地址、无上下文返回空串或 null | S:用例刻意避开 127.0.0.1 等回环地址——那会触发 InetAddress.getLocalHost()，结果依赖运行环境且可能做反向 DNS
