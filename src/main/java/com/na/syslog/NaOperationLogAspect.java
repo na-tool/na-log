@@ -1,13 +1,15 @@
 package com.na.syslog;
 
-import com.na.common.constant.NaConst;
-import com.na.common.exceptions.NaBusinessException;
-import com.na.common.result.enums.NaStatus;
-import com.na.common.syslog.dto.NaSysLogDto;
-import com.na.common.utils.*;
+import com.na.common.constant.GlobalConst;
+import com.na.common.syslog.dto.SysLogDto;
+import com.na.common.utils.AddressUtil;
+import com.na.common.utils.CommonUtil;
+import com.na.common.utils.DateTimeUtil;
+import com.na.common.utils.IDUtil;
+import com.na.common.utils.SpringContextUtil;
 import com.na.syslog.annotation.NaOperationLog;
 import com.na.syslog.config.NaAutoLogConfig;
-import com.na.common.syslog.util.NaLogEventUtil;
+import com.na.common.syslog.util.LogEventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -19,8 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
@@ -35,7 +37,7 @@ public class NaOperationLogAspect {
     private NaAutoLogConfig naAutoLogConfig;
 
     @Autowired
-    private NaLogEventUtil naLogEventUtil;
+    private LogEventUtil logEventUtil;
 
     /**
      * 定义一个切入点.
@@ -68,10 +70,10 @@ public class NaOperationLogAspect {
 //            throw new NaBusinessException(NaStatus.AUTHORIZATION_EXPIRED,null);
 //        }
 
-        LocalDateTime startTime = NaDateTimeUtil.getCurrentBeijingDateTime();
+        LocalDateTime startTime = DateTimeUtil.getCurrentBeijingDateTime();
         Object result = point.proceed();
-        NaSysLogDto sysLogDto = new NaSysLogDto();
-        sysLogDto.setType(NaConst.NORMAL);
+        SysLogDto sysLogDto = new SysLogDto();
+        sysLogDto.setType(GlobalConst.NORMAL);
         if(naAutoLogConfig.getEnabled()){
             LogAspectContext context;
             try {
@@ -82,7 +84,7 @@ public class NaOperationLogAspect {
                 log.error("日志记录异常", e);
                 context = null;
                 sysLogDto.setContent(null);
-                sysLogDto.setType(NaConst.EX);
+                sysLogDto.setType(GlobalConst.EX);
                 sysLogDto.setExDesc("日志记录异常");
                 // 加入数据库日志记录
                 StringWriter sw = new StringWriter();
@@ -96,10 +98,10 @@ public class NaOperationLogAspect {
                 if (context != null) {
                     context.context.setResult(result);
                     context.formatter.afterContext(context.context);
-                    LocalDateTime finishTime = NaDateTimeUtil.getCurrentBeijingDateTime();
+                    LocalDateTime finishTime = DateTimeUtil.getCurrentBeijingDateTime();
 
-                    sysLogDto.setId(NaIDUtil.ID(17));
-                    sysLogDto.setRequestIp(NaAddressUtil.getIpAddress(context.context.getRequest()));
+                    sysLogDto.setId(IDUtil.ID(17));
+                    sysLogDto.setRequestIp(AddressUtil.getIpAddress(context.context.getRequest()));
 
                     sysLogDto.setUserId(context.context.getUserId());
                     sysLogDto.setTenantId((context.context.getTenantId()));
@@ -128,7 +130,7 @@ public class NaOperationLogAspect {
                     //获取请求方法
                     sysLogDto.setStartTime(startTime);
                     sysLogDto.setFinishTime(finishTime);
-                    Long calculated = NaDateTimeUtil.calculateTimeDifference(startTime, finishTime);
+                    Long calculated = DateTimeUtil.calculateTimeDifference(startTime, finishTime);
                     sysLogDto.setConsumingTime(calculated);
                     sysLogDto.setModule(context.formatter.module().getCode());
                     sysLogDto.setOperate(context.formatter.operate().getCode());
@@ -150,7 +152,7 @@ public class NaOperationLogAspect {
             catch (Exception e) {
                 log.error("日志记录异常", e);
                 sysLogDto.setContent(null);
-                sysLogDto.setType(NaConst.EX);
+                sysLogDto.setType(GlobalConst.EX);
                 sysLogDto.setExDesc("日志记录异常");
                 // 加入数据库日志记录
                 StringWriter sw = new StringWriter();
@@ -159,8 +161,8 @@ public class NaOperationLogAspect {
                 String expDetail = sw.toString();
                 sysLogDto.setExDetail(expDetail);
             }
-            sysLogDto.setOperateTime(NaDateTimeUtil.getCurrentBeijingDateTime());
-            naLogEventUtil.publishEvent(sysLogDto);
+            sysLogDto.setOperateTime(DateTimeUtil.getCurrentBeijingDateTime());
+            logEventUtil.publishEvent(sysLogDto);
         }
         return result;
     }
@@ -175,8 +177,8 @@ public class NaOperationLogAspect {
     private LogAspectContext handleAround(ProceedingJoinPoint point) throws Exception {
         LogAspectContext context = null;
 
-        HttpServletRequest request = NaCommonUtil.getCurrentHttpRequest();
-        HttpServletResponse response = NaCommonUtil.getCurrentHttpResponse();
+        HttpServletRequest request = CommonUtil.getCurrentHttpRequest();
+        HttpServletResponse response = CommonUtil.getCurrentHttpResponse();
 
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
@@ -185,7 +187,7 @@ public class NaOperationLogAspect {
             NaOperationLog naOperationLog = method.getAnnotation(NaOperationLog.class);
             if (naOperationLog != null) {
                 Class<? extends INaLogFormatter> formatterClass = naOperationLog.formatter();
-                INaLogFormatter formatter = NaSpringContextUtil.getBean(formatterClass);
+                INaLogFormatter formatter = SpringContextUtil.getBean(formatterClass);
 
                 Object[] pointArgs = point.getArgs();
 
