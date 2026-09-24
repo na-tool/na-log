@@ -74,10 +74,17 @@ public class NaOperationLogAspect {
         Object result = point.proceed();
         SysLogDto sysLogDto = new SysLogDto();
         sysLogDto.setType(GlobalConst.NORMAL);
-        if(naAutoLogConfig.getEnabled()){
+        if (naAutoLogConfig.isEnabled()) {
             LogAspectContext context;
             try {
                 context = handleAround(point);
+                if (context == null) {
+                    // 解析不到 @NaOperationLog，或当前不在 Web 请求上下文中。
+                    // 这不是应用异常：既不伪造一条 EX 记录，也不发布只有时间戳的空记录。
+                    log.warn("操作日志跳过，无法建立 Formatter 上下文，method={}",
+                            point.getSignature().toShortString());
+                    return result;
+                }
                 context.formatter.beforeContext(context.context);
             }
             catch (Exception e) {
@@ -134,7 +141,7 @@ public class NaOperationLogAspect {
                     sysLogDto.setConsumingTime(calculated);
                     sysLogDto.setModule(context.formatter.module().getCode());
                     sysLogDto.setOperate(context.formatter.operate().getCode());
-                    if(Boolean.TRUE.equals(naAutoLogConfig.getCn())){
+                    if (naAutoLogConfig.isCn()) {
                         sysLogDto.setModule(context.formatter.module().getDesc());
                         sysLogDto.setOperate(context.formatter.operate().getDesc());
                     }
@@ -187,6 +194,11 @@ public class NaOperationLogAspect {
 
         HttpServletRequest request = CommonUtil.getCurrentHttpRequest();
         HttpServletResponse response = CommonUtil.getCurrentHttpResponse();
+        if (request == null) {
+            // 非 Web 请求上下文（如定时任务调用带注解的方法），后续取 URI/Method/UA
+            // 都会 NPE，这里统一收敛到调用方的显式跳过分支。
+            return null;
+        }
 
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();

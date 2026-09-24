@@ -10,6 +10,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "na.log")
 public class NaAutoLogConfig {
 //    private String key;
-    private Boolean enabled = true;
-    private Boolean cn = false;
+    private boolean enabled = true;
+    private boolean cn = false;
 }
