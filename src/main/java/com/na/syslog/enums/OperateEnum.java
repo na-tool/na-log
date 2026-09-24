@@ -2,7 +2,7 @@ package com.na.syslog.enums;
 
 
 
-public enum NaOperateEnum implements INaOperateProvider{
+public enum OperateEnum implements IOperateProvider{
     /**
      * 默认操作
      */
@@ -59,7 +59,7 @@ public enum NaOperateEnum implements INaOperateProvider{
     private final String code;
     private final String desc;
 
-    private NaOperateEnum(String code, String desc) {
+    private OperateEnum(String code, String desc) {
         this.code = code;
         this.desc = desc;
     }

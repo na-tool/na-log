@@ -2,7 +2,7 @@ package com.na.syslog.enums;
 
 
 
-public enum NaModuleEnum implements INaModelProvider {
+public enum ModuleEnum implements IModelProvider {
     /**
      * 默认模块
      */
@@ -63,7 +63,7 @@ public enum NaModuleEnum implements INaModelProvider {
     private final String code;
     private final String desc;
 
-    private NaModuleEnum(String code, String desc) {
+    private ModuleEnum(String code, String desc) {
         this.code = code;
         this.desc = desc;
     }

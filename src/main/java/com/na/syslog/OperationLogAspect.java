@@ -7,11 +7,11 @@ import com.na.common.utils.CommonUtil;
 import com.na.common.utils.DateTimeUtil;
 import com.na.common.utils.IDUtil;
 import com.na.common.utils.SpringContextUtil;
-import com.na.syslog.annotation.NaOperationLog;
-import com.na.syslog.config.NaAutoLogConfig;
-import com.na.syslog.enums.INaModelProvider;
-import com.na.syslog.enums.INaOperateProvider;
+import com.na.syslog.annotation.OperationLog;
+import com.na.syslog.config.AutoLogConfig;
+import com.na.syslog.enums.IModelProvider;
 import com.na.common.syslog.util.LogEventUtil;
+import com.na.syslog.enums.IOperateProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -37,13 +37,13 @@ import java.time.LocalDateTime;
 @Aspect
 @Order(2)
 @Slf4j
-public class NaOperationLogAspect {
+public class OperationLogAspect {
 
-    private final NaAutoLogConfig naAutoLogConfig;
+    private final AutoLogConfig autoLogConfig;
     private final LogEventUtil logEventUtil;
 
-    public NaOperationLogAspect(NaAutoLogConfig naAutoLogConfig, LogEventUtil logEventUtil) {
-        this.naAutoLogConfig = naAutoLogConfig;
+    public OperationLogAspect(AutoLogConfig autoLogConfig, LogEventUtil logEventUtil) {
+        this.autoLogConfig = autoLogConfig;
         this.logEventUtil = logEventUtil;
     }
 
@@ -69,20 +69,11 @@ public class NaOperationLogAspect {
      */
     @Around("entryPoint()")
     public Object around(ProceedingJoinPoint point) throws Throwable {
-//        String key = naAutoLogConfig != null ? naAutoLogConfig.getKey() : null;
-//        if (StringUtils.isEmpty(key)) {
-//            throw new NaBusinessException(NaStatus.AUTHORIZATION_EXPIRED,null);
-//        }
-//
-//        if(!LicenseValidator.isValidLicense(key)) {
-//            throw new NaBusinessException(NaStatus.AUTHORIZATION_EXPIRED,null);
-//        }
-
         LocalDateTime startTime = DateTimeUtil.getCurrentBeijingDateTime();
         Object result = point.proceed();
         SysLogDto sysLogDto = new SysLogDto();
         sysLogDto.setType(GlobalConst.NORMAL);
-        if (naAutoLogConfig.isEnabled()) {
+        if (autoLogConfig.isEnabled()) {
             LogAspectContext context;
             try {
                 context = handleAround(point);
@@ -134,9 +125,9 @@ public class NaOperationLogAspect {
                     Long calculated = DateTimeUtil.calculateTimeDifference(startTime, finishTime);
                     sysLogDto.setConsumingTime(calculated);
                     // module()/operate() 是宿主可自定义的虚方法，提取一次避免重复调用
-                    INaModelProvider module = context.formatter.module();
-                    INaOperateProvider operate = context.formatter.operate();
-                    if (naAutoLogConfig.isCn()) {
+                    IModelProvider module = context.formatter.module();
+                    IOperateProvider operate = context.formatter.operate();
+                    if (autoLogConfig.isCn()) {
                         sysLogDto.setModule(module.getDesc());
                         sysLogDto.setOperate(operate.getDesc());
                     } else {
@@ -276,16 +267,16 @@ public class NaOperationLogAspect {
         Method method = signature.getMethod();
         Class<?> targetClass = point.getTarget().getClass();
         if (method != null) {
-            NaOperationLog naOperationLog = method.getAnnotation(NaOperationLog.class);
-            if (naOperationLog != null) {
-                Class<? extends INaLogFormatter> formatterClass = naOperationLog.formatter();
-                INaLogFormatter formatter = SpringContextUtil.getBean(formatterClass);
+            OperationLog operationLog = method.getAnnotation(OperationLog.class);
+            if (operationLog != null) {
+                Class<? extends ILogFormatter> formatterClass = operationLog.formatter();
+                ILogFormatter formatter = SpringContextUtil.getBean(formatterClass);
 
                 Object[] pointArgs = point.getArgs();
 
                 context = new LogAspectContext();
                 context.formatter = formatter;
-                context.context = new NaLogFormatterContext(request,response, targetClass.getName(), method, pointArgs);
+                context.context = new LogFormatterContext(request,response, targetClass.getName(), method, pointArgs);
             }
         }
 
@@ -293,8 +284,8 @@ public class NaOperationLogAspect {
     }
 
     private static class LogAspectContext {
-        public INaLogFormatter formatter;
-        public NaLogFormatterContext context;
+        public ILogFormatter formatter;
+        public LogFormatterContext context;
     }
 
 }

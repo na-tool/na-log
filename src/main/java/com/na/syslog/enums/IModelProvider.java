@@ -1,6 +1,6 @@
 package com.na.syslog.enums;
 
-public interface INaModelProvider {
+public interface IModelProvider {
     String getCode();
     String getDesc();
 

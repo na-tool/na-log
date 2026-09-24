@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 @Getter
 @Setter
 @ToString(exclude = {"request", "response", "method", "parameters", "result", "contextData"})
-public class NaLogFormatterContext {
+public class LogFormatterContext {
     private final HttpServletRequest request;
     private final HttpServletResponse response;
     private final String className;
@@ -34,11 +34,11 @@ public class NaLogFormatterContext {
     private String tenantId;
 
 
-    public NaLogFormatterContext(HttpServletRequest request,
-                                 HttpServletResponse response,
-                                 String className,
-                                 Method method,
-                                 Object[] parameters) {
+    public LogFormatterContext(HttpServletRequest request,
+                               HttpServletResponse response,
+                               String className,
+                               Method method,
+                               Object[] parameters) {
         this.request = request;
         this.response = response;
         this.className = className;

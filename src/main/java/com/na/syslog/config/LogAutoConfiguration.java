@@ -1,7 +1,7 @@
 package com.na.syslog.config;
 
 import com.na.common.syslog.util.LogEventUtil;
-import com.na.syslog.NaOperationLogAspect;
+import com.na.syslog.OperationLogAspect;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -27,21 +27,21 @@ import java.util.concurrent.Executor;
  */
 @AutoConfiguration
 @EnableAsync
-@EnableConfigurationProperties(NaAutoLogConfig.class)
-public class NaLogAutoConfiguration {
+@EnableConfigurationProperties(AutoLogConfig.class)
+public class LogAutoConfiguration {
 
     /**
      * 注册操作日志采集切面。
      *
-     * @param naAutoLogConfig na.log 配置项
+     * @param autoLogConfig na.log 配置项
      * @param logEventUtil    na-common 的事件发布工具
      * @return 采集切面，Bean 名保持为 naOperationLogAspect 以兼容既有注入点
      */
     @Bean
     @ConditionalOnMissingBean
-    public NaOperationLogAspect naOperationLogAspect(NaAutoLogConfig naAutoLogConfig,
-                                                     LogEventUtil logEventUtil) {
-        return new NaOperationLogAspect(naAutoLogConfig, logEventUtil);
+    public OperationLogAspect naOperationLogAspect(AutoLogConfig autoLogConfig,
+                                                   LogEventUtil logEventUtil) {
+        return new OperationLogAspect(autoLogConfig, logEventUtil);
     }
 
     /**

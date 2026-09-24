@@ -12,7 +12,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @Data
 @ConfigurationProperties(prefix = "na.log")
-public class NaAutoLogConfig {
+public class AutoLogConfig {
 //    private String key;
     private boolean enabled = true;
     private boolean cn = false;
