@@ -162,7 +162,15 @@ public class NaOperationLogAspect {
                 sysLogDto.setExDetail(expDetail);
             }
             sysLogDto.setOperateTime(DateTimeUtil.getCurrentBeijingDateTime());
-            logEventUtil.publishEvent(sysLogDto);
+            try {
+                logEventUtil.publishEvent(sysLogDto);
+            } catch (Throwable t) {
+                // 日志落库失败绝不能影响业务请求。宿主用 @Async("sysLogThreadPool")
+                // 消费事件，线程池提交发生在当前请求线程内：队列满时 AbortPolicy 抛
+                // TaskRejectedException，宿主类路径不全时可能抛 NoClassDefFoundError，
+                // 用 Throwable 一并兜住，避免从 @Around 冒出去把业务请求打成 500。
+                log.error("操作日志事件发布失败，已忽略", t);
+            }
         }
         return result;
     }
