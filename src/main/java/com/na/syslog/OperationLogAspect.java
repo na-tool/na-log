@@ -43,11 +43,6 @@ import java.util.UUID;
 @Slf4j
 public class OperationLogAspect {
 
-    /** 与宿主监听器对 params 的截断约定保持一致 */
-    private static final int MAX_PARAMS_LENGTH = 1000;
-    /** 与宿主监听器的 STR_MAX_LENGTH 保持一致 */
-    private static final int MAX_RESULT_LENGTH = 16383;
-
     private final AutoLogConfig autoLogConfig;
     private final LogEventUtil logEventUtil;
     private final ApplicationContext applicationContext;
@@ -280,7 +275,7 @@ public class OperationLogAspect {
             }
             builder.append(text);
         }
-        return builder.length() == 0 ? null : truncate(builder.toString(), MAX_PARAMS_LENGTH);
+        return builder.length() == 0 ? null : builder.toString();
     }
 
     /**
@@ -297,18 +292,7 @@ public class OperationLogAspect {
         if (result == null) {
             return null;
         }
-        return truncate(ArrayUtils.toString(result, ""), MAX_RESULT_LENGTH);
-    }
-
-    /**
-     * 超长截断，与宿主消费端的既有约定保持一致。
-     *
-     * @param text 原始文本
-     * @param max  最大保留长度
-     * @return 截断后的文本
-     */
-    private static String truncate(String text, int max) {
-        return text.length() <= max ? text : text.substring(0, max) + "...(truncated)";
+        return ArrayUtils.toString(result, "");
     }
 
     /**
@@ -320,7 +304,7 @@ public class OperationLogAspect {
     private static void markBusinessError(SysLogDto dto, Exception businessError) {
         dto.setContent(null);
         dto.setType(SysLogDto.TYPE_EX);
-        dto.setExDesc(truncate(describe(businessError), MAX_PARAMS_LENGTH));
+        dto.setExDesc(describe(businessError));
         dto.setExDetail(ExceptionUtils.getStackTrace(businessError));
     }
 

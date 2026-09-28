@@ -229,7 +229,7 @@ public class SysLogListener {
 | `NaSysLogEvent` / `NaSysLogDto` → `SysLogEvent` / `SysLogDto` | 监听器改类型 |
 | `SysLogDto` 移除 `request` / `response` 字段 | 监听器若读过这两个 getter 需改用其他字段 |
 | `actionMethod` 现在落的是**方法名** | 此前它落的是类名（历史 bug）。下游若有基于旧值的统计需适配 |
-| `params` 落库格式：逗号分隔 + 1000 字符截断 | 若下游有解析逻辑需适配 |
+| `params` 落库格式改为逗号分隔、跳过 null 与空值 | 若下游有解析逻辑需适配。本模块不做长度截断，超长内容由宿主监听器在落库前自行截断 |
 | `result` 落库：null 由字符串 `"null"` 变为真 null，数组由对象哈希变为 `{a,b}` | 同上 |
 | 业务异常开始落库 | 失败请求会产生 `type=ex` 记录，注意数据量 |
 
