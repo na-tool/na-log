@@ -4,10 +4,12 @@ import com.na.syslog.OperationLogAspect;
 import com.na.syslog.utils.LogEventUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.support.BeanDefinitionOverrideException;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -16,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -90,12 +93,95 @@ class LogAutoConfigurationTest {
         });
     }
 
+    @Test
+    @DisplayName("宿主声明同名 Bean 即可覆盖日志线程池（走自动装配路径）")
+    void hostOverridesThreadPoolByName() {
+        runner.withUserConfiguration(HostThreadPoolConfig.class).run(context -> {
+            assertThat(context).hasBean("sysLogThreadPool");
+            // 宿主与默认实现同名，只能靠内容区分是谁的
+            ThreadPoolTaskExecutor pool = context.getBean("sysLogThreadPool", ThreadPoolTaskExecutor.class);
+            assertThat(pool.getThreadNamePrefix()).isEqualTo("host-log-");
+            assertThat(pool.getCorePoolSize()).isEqualTo(2);
+        });
+    }
+
+    @Test
+    @DisplayName("宿主 Bean 名不同则不覆盖，两个 Executor 共存")
+    void hostBeanWithDifferentNameCoexists() {
+        runner.withUserConfiguration(HostRenamedExecutorConfig.class).run(context -> {
+            assertThat(context).hasBean("sysLogThreadPool");
+            assertThat(context).hasBean("myExecutor");
+            assertThat(context.getBean("sysLogThreadPool", ThreadPoolTaskExecutor.class)
+                    .getThreadNamePrefix()).isEqualTo("sysLogThreadPool-");
+        });
+    }
+
+    @Test
+    @DisplayName("LogAutoConfiguration 被组件扫描当普通配置类拾取时仍能启动")
+    void startsWhenModuleConfigIsPickedUpByScanning() {
+        new ApplicationContextRunner()
+                .withUserConfiguration(LogAutoConfiguration.class)
+                .run(context -> {
+                    assertThat(context).hasNotFailed();
+                    assertThat(context).hasBean("sysLogThreadPool");
+                });
+    }
+
+    @Test
+    @DisplayName("被组件扫描拾取时，同名覆盖会启动失败：@ConditionalOnMissingBean 的让位保证只在自动装配阶段成立")
+    void overrideFailsWhenModuleConfigIsPickedUpByScanning() {
+        new ApplicationContextRunner()
+                // 宿主扫描 com.na 时，LogAutoConfiguration 会被当成普通 @Configuration 拾取，
+                // 与宿主的 @Bean 处于同一处理批次，顺序不确定 —— 这里固定为 na-log 先注册
+                .withUserConfiguration(LogAutoConfiguration.class, HostThreadPoolConfig.class)
+                .run(context -> {
+                    assertThat(context).hasFailed();
+                    assertThat(context.getStartupFailure())
+                            .isInstanceOf(BeanDefinitionOverrideException.class);
+                });
+    }
+
+    @Test
+    @DisplayName("宿主把线程池 Bean 名换成别的，自动装配的默认实现保持不动")
+    void renamedHostExecutorDoesNotAffectDefaultPool() {
+        runner.withUserConfiguration(HostRenamedExecutorConfig.class).run(context -> {
+            ThreadPoolTaskExecutor pool =
+                    context.getBean("sysLogThreadPool", ThreadPoolTaskExecutor.class);
+            assertThat(pool.getThreadNamePrefix()).isEqualTo("sysLogThreadPool-");
+            assertThat(pool.getCorePoolSize()).isEqualTo(5);
+            assertThat(pool.getMaxPoolSize()).isEqualTo(10);
+            assertThat(pool.getThreadPoolExecutor().getQueue().remainingCapacity()).isEqualTo(25);
+        });
+    }
+
     @Configuration
     static class HostOverrideConfig {
         @Bean
         OperationLogAspect hostAspect(AutoLogConfig config, LogEventUtil util,
                                       org.springframework.context.ApplicationContext ctx) {
             return new OperationLogAspect(config, util, ctx);
+        }
+    }
+
+    /** 宿主用自己的实现覆盖默认线程池：Bean 名必须也叫 sysLogThreadPool */
+    @Configuration
+    static class HostThreadPoolConfig {
+        @Bean(name = "sysLogThreadPool")
+        Executor hostThreadPool() {
+            ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+            executor.setCorePoolSize(2);
+            executor.setThreadNamePrefix("host-log-");
+            executor.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy());
+            return executor;
+        }
+    }
+
+    /** 宿主用了别的 Bean 名：不会覆盖，两个 Executor 共存 */
+    @Configuration
+    static class HostRenamedExecutorConfig {
+        @Bean(name = "myExecutor")
+        Executor myExecutor() {
+            return new ThreadPoolTaskExecutor();
         }
     }
 }
