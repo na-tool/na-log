@@ -86,24 +86,56 @@ na:
 
 ###### 调整日志线程池
 
-最常见的定制需求是调线程池参数：
+最常见的是调线程池参数。下面是**完整可直接复制**的写法（含 import）：
 
 ```java
+package com.yourpackage.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
+
 @Configuration
 public class MyLogConfig {
 
-    @Bean("sysLogThreadPool")   // 名字必须完全一致
-    public Executor myLogExecutor() {
+    /**
+     * 替换 na-log 的日志落库线程池。
+     * Bean 名必须叫 sysLogThreadPool —— 监听器上的 @Async("sysLogThreadPool")
+     * 就是按这个名字解析执行器的。
+     */
+    @Bean("sysLogThreadPool")
+    public Executor sysLogThreadPool() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(8);
         executor.setMaxPoolSize(32);
         executor.setQueueCapacity(500);
         executor.setThreadNamePrefix("my-log-");
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        // 不要手动调 initialize()：作为容器管理的 Bean，afterPropertiesSet() 会被自动调用
         return executor;
     }
 }
 ```
+
+三点注意：
+
+1. **起作用的只有 `@Bean` 里的名字**。方法名叫 `sysLogThreadPool()` 还是
+   `myLogExecutor()` 都无所谓，`@Bean("sysLogThreadPool")` 里的那串才是判据。
+   用别的名字不会覆盖，而是与默认线程池**共存** —— `@Async("sysLogThreadPool")`
+   仍然解析到默认那个，不报任何错。
+2. **返回类型写 `Executor` 还是 `ThreadPoolTaskExecutor` 都能被解析**，但推荐用
+   `ThreadPoolTaskExecutor` —— 它是 Spring 对 `Executor` 的封装，实现了
+   `AsyncTaskExecutor`，并且带来了线程包装、优雅停机（容器关闭时等待队列中的任务）
+   这些能力，裸 `ThreadPoolExecutor` 没有。
+3. **这个 `@Configuration` 类要被 Spring 扫到**（放在宿主自己的包下、能被
+   `@SpringBootApplication` 扫到即可），否则不会生效。
+
+**怎么确认生效了**：启动后调一次带 `@OperationLog` 的接口，然后看落库线程的
+名字 —— 应该出现 `my-log-1` 这样的线程名。如果看到的仍是 `sysLogThreadPool-1`，
+说明 Bean 名没对上、覆盖没生效（此时默认线程池照常在跑，不会报错）。
 
 默认参数：
 
@@ -118,10 +150,7 @@ public class MyLogConfig {
 > **默认拒绝策略是"丢弃并告警"**：过载时丢本次日志，并打一条 warn（**每秒最多
 > 一条**，带累计丢弃数）—— 既不阻塞业务线程，也不让告警本身变成新的负载。
 > 如果你们的日志不允许丢，可以换成 `CallerRunsPolicy`（改由请求线程同步落库，
-> 不丢但会拖慢请求）。
-
-> ⚠️ 用别的 Bean 名（如 `myLogExecutor`）**不会覆盖**，而是与默认线程池共存 ——
-> `@Async("sysLogThreadPool")` 仍然解析到默认的那个，容易误以为改生效了。
+> 不丢但会拖慢请求）；换成 `AbortPolicy` 则会把异常抛给业务请求，不建议。
 
 ###### 替换采集切面或事件发布器
 
