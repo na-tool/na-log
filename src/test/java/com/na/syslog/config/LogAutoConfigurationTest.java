@@ -154,11 +154,35 @@ class LogAutoConfigurationTest {
         });
     }
 
+    @Test
+    @DisplayName("被扫描拾取时宿主用异名 Bean 提供同类型切面，会静默注册出两个切面——比启动失败更隐蔽")
+    void duplicateAspectWhenScannedAndHostUsesDifferentName() {
+        new ApplicationContextRunner()
+                .withUserConfiguration(LogAutoConfiguration.class, HostNamedAspectConfig.class)
+                .run(context -> {
+                    // 上下文正常启动，没有任何告警：两个 @Aspect 同时生效，同一次请求会被记录两遍。
+                    // 若将来修复为按注册时机判断，此处会变成 1 个 Bean，届时删除本用例。
+                    assertThat(context).hasNotFailed();
+                    assertThat(context.getBeanNamesForType(OperationLogAspect.class))
+                            .containsExactlyInAnyOrder("operationLogAspect", "myOwnAspect");
+                });
+    }
+
     @Configuration
     static class HostOverrideConfig {
         @Bean
         OperationLogAspect hostAspect(AutoLogConfig config, LogEventUtil util,
                                       org.springframework.context.ApplicationContext ctx) {
+            return new OperationLogAspect(config, util, ctx);
+        }
+    }
+
+    /** 宿主用异名 Bean 提供同类型切面：没有名字冲突，@ConditionalOnMissingBean 是否让位取决于时机 */
+    @Configuration
+    static class HostNamedAspectConfig {
+        @Bean("myOwnAspect")
+        OperationLogAspect myOwnAspect(AutoLogConfig config, LogEventUtil util,
+                                       org.springframework.context.ApplicationContext ctx) {
             return new OperationLogAspect(config, util, ctx);
         }
     }
