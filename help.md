@@ -62,8 +62,7 @@ na:
 
 ##### 1.5 覆盖默认线程池
 
-日志线程池的 Bean 名是 `sysLogThreadPool`，带 `@ConditionalOnMissingBean` 让位，
-宿主声明同名 Bean 即可整体替换：
+日志线程池的 Bean 名是 `sysLogThreadPool`，宿主声明同名 Bean 即可整体替换：
 
 ```java
 @Configuration
@@ -85,16 +84,11 @@ public class MyLogConfig {
 Bean 名必须**完全一致**。用别的名字（如 `myLogExecutor`）不会覆盖，而是与新默认
 线程池共存 —— `@Async("sysLogThreadPool")` 仍然解析到默认的那个，容易误以为改生效了。
 
-> ⚠️ **前提：宿主不能扫描到 `com.na.syslog` 包。**
->
-> `LogAutoConfiguration` 带 `@Configuration` 元注解，会被组件扫描当作普通配置类拾取。
-> 一旦被拾取，它就和宿主的 `@Bean` 处于同一处理批次，`@ConditionalOnMissingBean`
-> 不再享有"自动装配在用户配置之后处理"的让位保证 —— 同名 Bean 会直接抛
-> `BeanDefinitionOverrideException`，**应用启动失败**。
->
-> 所以：若宿主为了装配其他组件必须 `@ComponentScan`，请把范围收紧到
-> `com.na.common` 之类，不要扫整个 `com.na`。这样 na-log 保持走自动装配，上面
-> 的覆盖方式才有效。
+同理，宿主提供自己的 `OperationLogAspect` 或 `LogEventUtil` 实现（**任何 Bean 名**）
+也会让对应的默认实现自动让位。
+
+覆盖在两种加载路径下都成立：无论本模块是通过自动装配引入，还是因为宿主的
+`@ComponentScan` 范围包含 `com.na` 而被当作普通配置类拾取，结果一致。
 
 #### 2 使用
 

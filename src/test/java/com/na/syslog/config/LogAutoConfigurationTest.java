@@ -128,16 +128,18 @@ class LogAutoConfigurationTest {
     }
 
     @Test
-    @DisplayName("被组件扫描拾取时，同名覆盖会启动失败：@ConditionalOnMissingBean 的让位保证只在自动装配阶段成立")
-    void overrideFailsWhenModuleConfigIsPickedUpByScanning() {
+    @DisplayName("被组件扫描拾取时，同名覆盖同样生效（不再因注册顺序而启动失败）")
+    void hostOverrideWorksEvenWhenModuleConfigIsPickedUpByScanning() {
         new ApplicationContextRunner()
-                // 宿主扫描 com.na 时，LogAutoConfiguration 会被当成普通 @Configuration 拾取，
-                // 与宿主的 @Bean 处于同一处理批次，顺序不确定 —— 这里固定为 na-log 先注册
+                // 宿主扫描 com.na 时，LogAutoConfiguration 会被当成普通 @Configuration 拾取。
+                // 注册改走 ImportBeanDefinitionRegistrar 后，此时宿主同名 Bean 已注册完毕，
+                // 默认实现会正确让位。
                 .withUserConfiguration(LogAutoConfiguration.class, HostThreadPoolConfig.class)
                 .run(context -> {
-                    assertThat(context).hasFailed();
-                    assertThat(context.getStartupFailure())
-                            .isInstanceOf(BeanDefinitionOverrideException.class);
+                    assertThat(context).hasNotFailed();
+                    ThreadPoolTaskExecutor pool =
+                            context.getBean("sysLogThreadPool", ThreadPoolTaskExecutor.class);
+                    assertThat(pool.getThreadNamePrefix()).isEqualTo("host-log-");
                 });
     }
 
@@ -155,16 +157,16 @@ class LogAutoConfigurationTest {
     }
 
     @Test
-    @DisplayName("被扫描拾取时宿主用异名 Bean 提供同类型切面，会静默注册出两个切面——比启动失败更隐蔽")
-    void duplicateAspectWhenScannedAndHostUsesDifferentName() {
+    @DisplayName("被扫描拾取时，宿主异名同类型切面不会与默认实现重复注册")
+    void noDuplicateAspectWhenScannedAndHostUsesDifferentName() {
         new ApplicationContextRunner()
                 .withUserConfiguration(LogAutoConfiguration.class, HostNamedAspectConfig.class)
                 .run(context -> {
-                    // 上下文正常启动，没有任何告警：两个 @Aspect 同时生效，同一次请求会被记录两遍。
-                    // 若将来修复为按注册时机判断，此处会变成 1 个 Bean，届时删除本用例。
+                    // 这是修复前最隐蔽的失效方式：上下文正常启动、无任何告警，
+                    // 但两个 @Aspect 同时织入，同一次请求被记录两遍。
                     assertThat(context).hasNotFailed();
                     assertThat(context.getBeanNamesForType(OperationLogAspect.class))
-                            .containsExactlyInAnyOrder("operationLogAspect", "myOwnAspect");
+                            .containsExactly("myOwnAspect");
                 });
     }
 
