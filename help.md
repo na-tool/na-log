@@ -41,6 +41,8 @@
 
 ##### 1.3 配置项
 
+本模块只有两个配置项，写在宿主的 `application.yml` 里：
+
 ```yaml
 na:
   log:
@@ -50,6 +52,13 @@ na:
     cn: false
 ```
 
+| 配置项 | 默认值 | 说明 |
+|---|---|---|
+| `na.log.enabled` | `true` | 采集总开关。关掉后切面只做放行，不产生任何日志事件 |
+| `na.log.cn` | `false` | `false` 时 `module` / `operate` 落库的是编码（如 `USER_MANAGEMENT`）；`true` 时落中文描述（如 `用户管理`） |
+
+> 不写 `na.log` 段即为上表默认行为，这两个配置项都是可选的。
+>
 > 早期版本的 `na.log.key` 已失效：授权校验代码已整体移除，配置该项不再有任何效果。
 
 ##### 1.4 装配
@@ -60,15 +69,30 @@ na:
 > `@EnableAsync` 随本模块的自动装配一同生效。若宿主代码中存在此前因缺少
 > `@EnableAsync` 而静默失效的 `@Async` 方法，引入本模块后会开始真正异步执行。
 
-##### 1.5 覆盖默认线程池
+##### 1.5 定制与覆盖
 
-日志线程池的 Bean 名是 `sysLogThreadPool`，宿主声明同名 Bean 即可整体替换：
+本模块注册三个 Bean，**三个都可以被宿主替换**。做法都一样：在自己的
+`@Configuration` 里声明对应的 Bean，不需要开关、不需要配置项。
+
+| 要替换的东西 | 默认 Bean 名 | 覆盖时 Bean 名怎么起 |
+|---|---|---|
+| 日志线程池 | `sysLogThreadPool` | **必须完全一致** |
+| 采集切面 `OperationLogAspect` | `operationLogAspect` | 任意 |
+| 事件发布器 `LogEventUtil` | `logEventUtil` | 任意 |
+
+切面与发布器按**类型**判断是否让位，所以名字随便起；线程池按**名字**判断 ——
+宿主通常还有别的用途的 `Executor`，按类型让位会因为一个无关的线程池就把日志池
+整个跳过，所以名字必须一致。
+
+###### 调整日志线程池
+
+最常见的定制需求是调线程池参数：
 
 ```java
 @Configuration
 public class MyLogConfig {
 
-    @Bean(name = "sysLogThreadPool")
+    @Bean("sysLogThreadPool")   // 名字必须完全一致
     public Executor myLogExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(8);
@@ -81,14 +105,47 @@ public class MyLogConfig {
 }
 ```
 
-Bean 名必须**完全一致**。用别的名字（如 `myLogExecutor`）不会覆盖，而是与新默认
-线程池共存 —— `@Async("sysLogThreadPool")` 仍然解析到默认的那个，容易误以为改生效了。
+默认参数：
 
-同理，宿主提供自己的 `OperationLogAspect` 或 `LogEventUtil` 实现（**任何 Bean 名**）
-也会让对应的默认实现自动让位。
+| 参数 | 默认值 | 说明 |
+|---|---|---|
+| `corePoolSize` | 5 | 核心线程数 |
+| `maxPoolSize` | 10 | 最大线程数 |
+| `queueCapacity` | 25 | 队列容量。核心 + 最大 + 队列 = 35，超过才开始触发拒绝策略 |
+| `threadNamePrefix` | `sysLogThreadPool-` | 线程名前缀，排查日志落库积压时靠它认 |
+| `rejectedExecutionHandler` | 丢弃并告警 | 不是 `AbortPolicy`。见下方说明 |
 
-覆盖在两种加载路径下都成立：无论本模块是通过自动装配引入，还是因为宿主的
-`@ComponentScan` 范围包含 `com.na` 而被当作普通配置类拾取，结果一致。
+> **默认拒绝策略是"丢弃并告警"**：过载时丢本次日志，并打一条 warn（**每秒最多
+> 一条**，带累计丢弃数）—— 既不阻塞业务线程，也不让告警本身变成新的负载。
+> 如果你们的日志不允许丢，可以换成 `CallerRunsPolicy`（改由请求线程同步落库，
+> 不丢但会拖慢请求）。
+
+> ⚠️ 用别的 Bean 名（如 `myLogExecutor`）**不会覆盖**，而是与默认线程池共存 ——
+> `@Async("sysLogThreadPool")` 仍然解析到默认的那个，容易误以为改生效了。
+
+###### 替换采集切面或事件发布器
+
+宿主如果有更复杂的采集或落库需求，可以整体替换（Bean 名随意）：
+
+```java
+@Configuration
+public class MyLogConfig {
+
+    @Bean
+    public OperationLogAspect myOwnAspect(AutoLogConfig config,
+                                          LogEventUtil util,
+                                          ApplicationContext ctx) {
+        return new OperationLogAspect(config, util, ctx);
+    }
+}
+```
+
+本模块检测到容器里已有同类型 Bean 时，会跳过自己的默认实现。
+
+###### 关于加载路径
+
+以上覆盖方式在两种加载路径下都成立：无论本模块是通过自动装配引入，还是因为宿主
+的 `@ComponentScan` 范围包含 `com.na` 而被当作普通配置类拾取，结果一致。
 
 #### 2 使用
 
